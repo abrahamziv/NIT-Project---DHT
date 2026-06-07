@@ -1,0 +1,64 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb}
+\usepackage{geometry}
+\usepackage{enumitem}
+\geometry{margin=2.5cm}
+
+\title{\textbf{Meeting Notes --- Prof.\ Asaf Cohen}\\
+\large Decentralized Detection: Questions \& Insights -1}
+\author{Oren Ram \& Ziv Abraham}
+\date{Spring 2026}
+
+\begin{document}
+\maketitle
+
+\begin{enumerate}[leftmargin=*, itemsep=10pt]
+
+    \item The paper defines two cost functions: $J^N$ for finite $N$ and
+    $J^N_{EE} = \frac{\log J^N}{N}$ for the infinite-sensor regime.
+    What is the conceptual difference between them, and why does taking
+    the logarithm give a meaningful objective?
+
+    \item Assumption~1(ii) requires that all observation distributions
+    are dominated by a common base measure $Q$.
+    What is the intuition behind this condition, and what concretely
+    breaks in the analysis if it does not hold?
+
+    \item Assumption~1(iii) fixes a common action space $\mathbb{U} = \{1,\ldots,M\}$
+    for all sensors, and Prof.\ Cohen's annotation suggests that
+    allocating rate unevenly across sensors can improve performance.
+    How exactly is that rate-allocation idea related to Assumption~1(iii),
+    and is there a connection between the likelihood ratio $l^i$ at each
+    sensor and the total system rate $R_{\text{total}}$?
+
+    \item Each sensor maps its observation to a discrete action $u^i$
+    and sends it to the fusion center.
+    Does the model assume sensors transmit immediately upon receiving
+    a signal, or do they accumulate observations and send a packet?
+
+    \item Lemma~2 characterizes the optimal decision rule at the fusion center.
+    What is the main point of the lemma, and how is it proven?
+
+    \item With $M$ actions, the optimal sensor policy $\gamma^i$ partitions
+    the likelihood-ratio axis into $M$ intervals.
+    How does increasing the rate $R = \log_2 M$ affect the optimal
+    policies $\gamma^i$ for sensors $i > 1$?
+
+    \item The paper assumes sensors know the exact distributions
+    $P_{Y|H_1}$ and $P_{Y|H_2}$ when designing their encoding policies.
+    Can a \emph{universal} sensor policy be designed that achieves optimal
+    performance without knowledge of the true distributions --- analogous
+    to universal source coding?
+
+    \item The proof relies on observations being i.i.d.\ across sensors
+    given the hypothesis.
+    What happens to the exchangeability and identical-policy results
+    when sensors are spatially correlated?
+
+    \item The paper considers binary hypothesis testing throughout.
+    Do the main results --- threshold policies and identical encoding
+    in the limit --- generalize to $M$-ary hypothesis testing?
+
+\end{enumerate}
+
+\end{document}
