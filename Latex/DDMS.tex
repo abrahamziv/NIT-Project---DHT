@@ -1,0 +1,147 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc}
+
+\newcommand{\HS}{H^\star}
+
+\title{Critical Summary: Decentralized Detection with Many Sensors}
+\author{Oren Ram \\ Ziv Abraham}
+\date{\today}
+
+\begin{document}
+\maketitle
+\newpage
+
+\section{Introduction}
+\subsection{Background - Remote Hypothesis Testing}
+- Add From Lecture -
+\subsection{2}
+In our work, we are going to discuss a problem of Decentrlized Hypothesis Testing, where many sensors observe an environment, compress the observation into an action, and send the actions to a fusion center (FC). The FC decides between two hypothesis - $H_1$ or $H_2$.\\
+The paper we are going to discuss is Decentrlized Detection with Many Sensors: Optimality of Exchangeable and Identical Encoding Policies [1], and specifically, we are attending the finite number of sensors problem discussed in the paper.
+
+
+
+\section{Problem Setup}
+
+We ocnsider a problem of Binary Detection, as described in [1]. Assuming there are two hypothesis, $H_1$ and $H_2$, 
+the true one can be regarded as $\HS$, a random varible with $P(\HS = H_1) = p$, $P(\HS = H_2) = 1-p$. The setup being tested:
+\begin{itemize}
+    \item $N < \infty$ sensors, each makes an observation of the environment deonted by $y^i \in \mathcal{Y}^i$ as the observation of the $i$-th sensor for $i \in \{1,\dots, N\}$.
+    \item Each sensor quantizes its observation using a mapping $\gamma^i: \mathcal{Y}^i \to \mathcal{U}^i$, $\mathcal{U}^i$ being the set of actions the sensor can send.
+    $\gamma^i$ is the desicion rule / policy of the $i$-th sensor. 
+    \item The FC's policy is noted as $\gamma^0: \mathcal{U}^0 \times \mathcal{U}^1 \times \dots \mathcal{U}^N \to \{1,2\}$.\\
+    Essentialy, the fusion center decides $u_0 = \gamma^0(u^{1:N}), u_0 \in \{1,2\}$.
+    \item The cost function we will focus on is:
+    \begin{align}
+        c(H_j,u^0)= 
+                        \begin{cases}
+                            1 & \text{if } u^0 \neq j \\
+                            0 & \text{if } u^0 = j
+                        \end{cases}
+    \end{align}
+    \item Our goal is to minimize the expected cost:
+    \begin{align}
+        J^N(\gamma^{0:N}) \triangleq \mathbb{E}[c(H,u^0)]
+    \end{align}
+\end{itemize}
+As the number of sensors $N$ increases, according to [1] and [2], $J^N(\gamma^{0:N})$ is bound by a decaying exponent,
+regardless of the policies being used. This decay, and percisely how strong this decay is, is what carries the relevant information about
+about the performence of a vector of policies, so the problem of minimizing the expected cost becomes maximizing the normlized error exponent - 
+\begin{align}
+    J^N_{EE}\bigg(\frac{\log(J^N(\gamma^{0:N}))}{N}\bigg)
+\end{align}
+\newpage
+\subsection{Assumptions}
+In order to make the problem tractable, the authors of the paper consider a few assumptions:
+\begin{enumerate}[label=(\roman*)]
+    \item $y^1, \dots, y^N$ are i.i.d conditioned on $H$
+    \item Under either hypothesis, sensor $i$'s observation has a probability density, measured against one common reference measure shared across both hypothesis.
+    \item $\mathcal{U}^i = \mathcal{U}$ for $i = 1,\dots ,N$, and $\mathcal{U}$ is a finite set.
+    \item The likelihood ratio:
+    \begin{align}
+        l^i = L(y^i) := \frac{f_{y^i|H}(y^i|H_2)}{f_{y^i|H}(y^i|H_1)} \text{a.s}
+    \end{align}
+    Is well behaving and invertible.
+\end{enumerate}
+While (i) is a common assumption in order to simplify the math and making it tractable, assumptions (ii) and (iv) are essential in order for $l^i$ to be a sufficient statistic of $y^i$, as will be discussed later.
+Assumption (iii) dictates that all sensors have the same action set, underlying assumption about the compression and rate being used. This will be discussed furthermore in section *, where we will offer some modifications for the solution setup.
+
+\section{Sufficient Statistics, Existence of an Optimal Encoding Policy}
+
+\subsection{Exponential Decay of the Error Probability}
+
+\subsection{$l^i$ is a Sufficient Statistic}
+
+$l^i$ is a sufficient statistic of $H$: once its value is known, nothing else
+about the raw observation $y^i$ can further move one's belief about which
+hypothesis is true. With only two hypotheses on the table, the entire way in which
+the observation's density can vary with $H$ is exhausted by a single comparison -
+how large the density is under $H_2$ relative to how large it is under $H_1$, at
+that particular observation. A single number is therefore inherently enough to
+hold everything that changes with $H$, and that number is, by construction,
+exactly $l^i$. (How this shows up concretely inside the paper's own machinery -
+via Lemma~1 -- is worth treating separately once we get there.)
+
+\subsubsection*{No information loss: a Markov-chain and DPI reading}
+Sufficiency means that any two raw observations producing the same $l^i$ are, for
+the purpose of distinguishing $H_1$ from $H_2$, interchangeable: whatever detail of
+$y^i$ is discarded in forming $l^i$ carries no evidential weight about $H$. This
+has a clean information-theoretic statement. Since $l^i$ is a deterministic
+function of $y^i$, the chain
+\[
+    H \;\to\; y^i \;\to\; l^i
+\]
+is trivially Markov, and the Data Processing Inequality (DPI) gives
+\begin{equation}
+    I(H; l^i) \le I(H; y^i).
+\end{equation}
+Equality holds \emph{iff} $l^i$ is sufficient for $H$ -- equivalently, iff
+$H \to l^i \to y^i$ is \emph{also} a Markov chain, i.e.\ $y^i$ carries no further
+information about $H$ once $l^i$ is fixed, gives equality
+\begin{equation}
+    I(H; l^i) = I(H; y^i).
+\end{equation}
+
+\subsection{Optimality of Threshold Policies and the MAP Decoder}
+\subsubsection*{Lemma 1}
+Let Assumption 1 hold. Then, for any fusion rule $\gamma^0 \in \Gamma^0$,
+\begin{equation}
+    \inf_{\gamma^{1:N} \in \Gamma^N} J^N(\gamma^0, \gamma^{1:N})
+    = \inf_{\gamma^{1:N} \in \Gamma^N_{TS}} J^N(\gamma^0, \gamma^{1:N}).
+\end{equation}
+Where $\Gamma^N_{TS}$ is the class of threshold policies.
+Fixing every sensor's policy except sensor $i$'s, sensor $i$'s optimization is:
+
+\begin{align}
+    \inf_{u^i \in \mathcal U} \bigg\{\sum_{j=1,2} P(H_j \mid y^i)\, E_{\gamma^{-i\star}}\big[c(H_j, \gamma^0(u^{1:N})) \mid H_j\big]\bigg\}
+\end{align}
+
+By Bayes' rule,
+$P(H_j \mid y^i)$ depends on $y^i$ only through the likelihood ratio $l^i$ --
+this is exactly the sufficiency of $l^i$ from Section [X] showing up again,
+now inside the optimization itself. Substituting reduces the problem to
+\begin{equation}
+    \inf_{u^i \in \mathcal U} \left[ g^i(H_1, u^i) + g^i(H_2, u^i)\, l^i\,
+    \frac{P(H_2)}{P(H_1)} \right],
+\end{equation}
+where $g^i(H_j, u^i)$ is the expected cost of action $u^i$ under $H_j$ given the
+other sensors' fixed policies. This is linear in $l^i$ for each action, so the
+best action is whichever line is lowest at that value of $l^i$, switching only
+at the points where lines cross -- exactly a threshold rule.
+\subsubsection*{Lemma 2}
+
+\subsection{Existence of an Optimal Solution}
+Lemmas 1 and 2 tell us where to look; Theorem 1, via the compactness result of Lemma 3, is what guarantees something is actually there to find
+
+\section{Considering Rate}
+
+
+
+\end{document}

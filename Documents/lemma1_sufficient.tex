@@ -1,0 +1,56 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+
+\title{DDMS}
+\author{אורן רם}
+\date{July 2026}
+
+\begin{document}
+
+
+
+
+
+\section{The Likelihood Ratio as a Sufficient Statistic}
+
+\subsection{Definition}
+For each sensor $i$, define the likelihood ratio of its observation as
+\begin{equation}
+    l^i := L(y^i) := \frac{f_{Y^i|H}(y^i \mid H_2)}{f_{Y^i|H}(y^i \mid H_1)}
+    \quad \text{a.s.}
+    \label{eq:likelihood-ratio}
+\end{equation}
+a single real number capturing how much more consistent the raw observation $y^i$
+is with $H_2$ than with $H_1$.
+
+\subsection{Why $l^i$ is sufficient}
+$l^i$ is a sufficient statistic for $H$: once its value is known, nothing else
+about the raw observation $y^i$ can further move one's belief about which
+hypothesis is true. With only two hypotheses on the table, the entire way in which
+the observation's density can vary with $H$ is exhausted by a single comparison -
+how large the density is under $H_2$ relative to how large it is under $H_1$, at
+that particular observation. A single number is therefore inherently enough to
+hold everything that changes with $H$, and that number is, by construction,
+exactly $l^i$. (How this shows up concretely inside the paper's own machinery -
+via Lemma~1 -- is worth treating separately once we get there.)
+
+\subsection{No information loss: a Markov-chain and DPI reading}
+Sufficiency means that any two raw observations producing the same $l^i$ are, for
+the purpose of distinguishing $H_1$ from $H_2$, interchangeable: whatever detail of
+$y^i$ is discarded in forming $l^i$ carries no evidential weight about $H$. This
+has a clean information-theoretic statement. Since $l^i$ is a deterministic
+function of $y^i$, the chain
+\[
+    H \;\to\; y^i \;\to\; l^i
+\]
+is trivially Markov, and the Data Processing Inequality (DPI) gives
+\begin{equation}
+    I(H; l^i) \le I(H; y^i).
+\end{equation}
+Equality holds \emph{iff} $l^i$ is sufficient for $H$ -- equivalently, iff
+$H \to l^i \to y^i$ is \emph{also} a Markov chain, i.e.\ $y^i$ carries no further
+information about $H$ once $l^i$ is fixed, gives equality
+\begin{equation}
+    I(H; l^i) = I(H; y^i).
+\end{equation}
+\end{document}
