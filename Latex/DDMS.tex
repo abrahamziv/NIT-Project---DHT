@@ -20,12 +20,12 @@
 \begin{document}
 \maketitle
 
-\section{Introduction}
-\subsection{Background}
-Hypothesis Testing problems address the problem of deciding, based on observations, which of two or more probability laws have generated
-the observed data.
-\subsection{Decentralized Remote Hypothesis Testing}
-In our critical summary, we discuss the results of the paper "Decentralized Detection with Many Sensors: Optimality of Exchangeable and Identical Encoding Policies" [1]. The paper addresses the problem of Decentralized Hypothesis Testing: many sensors observe an environment, compress their observations into actions, and send those actions to a fusion center (FC), which decides between two hypotheses, $H_1$ and $H_2$. While the paper's authors build tools for both the finite and infinite number of sensors regimes, in our work we focus on the finite-$N$ setting.
+\section{Introduction - Decentralized Remote Hypothesis Testing}
+In our critical summary, we discuss the results of the paper "Decentralized Detection with Many Sensors: Optimality of Exchangeable and Identical Encoding Policies" [1]. 
+The paper addresses the problem of Decentralized Hypothesis Testing: many sensors observe an environment, compress their observations into actions, 
+and send those actions to a fusion center (FC), which decides between two hypotheses, $H_1$ and $H_2$. While the paper's authors build 
+tools for both the finite and infinite number of sensors regimes, in our work we focus on the 
+finite-$N$ setting. %How to address asaf's note of n -> infty?
 
 \section{Problem Setup}
 
@@ -74,19 +74,19 @@ Assumption (v)'s essentiality will be discussed in Section~\ref{sec:threshold-ma
 \subsection{Exponential Decay of the Error Probability}
 According to the law of large numbers, we can expect that $J^N(\gamma^{0:N})$ will
 converge to the probability of error under decision rules $\gamma^{0:N}$. Also, under the criterion of minimizing the probability of error,
-using the MAP rule at the fusion center is optimal for any sensor policy [2,8-10].\newline
-\textbf{[Proposition 5.1, 2]} - if $y^1,\dots,y^N$ are i.i.d. given $\HS$ and $P_{Y|H_1} \neq P_{Y|H_2}$, then there exists a decision rule $\gamma'$ and constants $\alpha, \beta > 0$ independent of $N$ such that
-if all sensors use $\gamma'$ and the FC uses MAP then: $P_e < \alpha e^{-N\beta}$.\newline
-Since our FC uses MAP and $y^1,\dots,y^N$ are i.i.d. conditioned on $\HS$, there exists a vector of policies ${\gamma^{0:N}}'$ such that $J^{N}({\gamma^{0:N}}') < \alpha e^{-N \beta}$,
-it is sure that there exists $\alpha, \beta > 0$ such that:
+using the MAP rule at the fusion center is optimal for any sensor policy [2,8-10].\newline \newline
+\textbf{[Proposition 5.1, 2]} - If $y^1,\dots,y^N$ are i.i.d. given $\HS$ and $P_{Y|H_1} \neq P_{Y|H_2}$, then there exists a decision rule $\gamma'$ and constants $\alpha, \beta > 0$ independent of $N$ such that
+if all sensors use $\gamma'$ and the FC uses MAP then: $P_e < \alpha e^{-N\beta}$.\newline \newline
+From [Proposition 5.1, 2], we can conclude that:
+
 \begin{align}
      J^{N\star}(\gamma^{0:N}) = \inf_{\gamma^{0:N}}\{J^N(\gamma^{0:N})\} \leq J^{N}({\gamma^{0:N}}') < \alpha e^{-N \beta}
 \end{align}
 From equation (4) we can understand that $P_e$ of any relevant sequence of policies is exponentially decaying as $N$ grows large, hence we 
 need to study and optimize the \textbf{Error Exponent}, to study how fast the error will decay given a sequence of policies. This leads to the definition:
-\begin{align*}
+\begin{align}
     J^N_{EE}(\gamma^{0:N}) = \frac{\log(J^N(\gamma^{0:N}))}{N}
-\end{align*}
+\end{align}
 We should notice that $J^N(\gamma^{0:N})\leq 1$ is a probability measure meaning its $\log$ is negative, hence we want to minimize $\JNEE$ to get a faster decay rate.
 \subsection{$l^i$ is a Sufficient Statistic}
 \label{sec:sufficient-statistic}
@@ -179,8 +179,8 @@ for some $t \in \mathbb{R}$ and $\DN$ given by:
 \begin{align}
     \DN \triangleq \frac{1}{N}\sum_{i=1}^{N}\log \frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)}
 \end{align}
-Recalling that in [2,8-10] it was established that the MAP rule is optimal for any deterministic sensor policy, we can
-see where $\DN$ is coming from. The MAP rule for our problem is:
+Recalling that in [2,8-10] it was established that the MAP rule is optimal for any deterministic sensor policy.
+The MAP rule for our problem is:
 \begin{align}
     \gamma^{0\star}(u^{1:N}) = \arg\max_{i \in \{1,2\}}P(H_i|u^{1:N})
 \end{align}
@@ -206,7 +206,7 @@ And this sums up how the optimal decision rule of the FC is established. It is i
 in order to calculate $\DN$, the FC must know how $u^i$ was derived, to give it its proper weight in the decision process.
 \subsection{Existence of an Optimal Solution}
 Lemmas 1 and 2 characterize the necessary structure of an optimal policy -- threshold at the sensors, MAP at the FC. Theorem 1, using the compactness result of Lemma 3, establishes that a minimizer with this structure exists.
-\\\subsubsection*{Lemma 3}
+\subsubsection*{Lemma 3}
 \begin{center}
     $\Gamma^N_{TS}$ is compact under total variation.
 \end{center}
