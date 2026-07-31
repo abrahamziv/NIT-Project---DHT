@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (MiKTeX 25.12) (preloaded format=xelatex 2026.4.6)  30 JUL 2026 13:25
+This is XeTeX, Version 3.141592653-2.6-0.999997 (MiKTeX 25.12) (preloaded format=xelatex 2026.4.6)  30 JUL 2026 15:57
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -563,18 +563,18 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 93.
+(hyperref)                removing `math shift' on input line 91.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `superscript' on input line 93.
+(hyperref)                removing `superscript' on input line 91.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 93.
+(hyperref)                removing `math shift' on input line 91.
 
 [2] [3]
-Underfull \hbox (badness 10000) in paragraph at lines 190--191
+Underfull \hbox (badness 10000) in paragraph at lines 188--189
 
  []
 
@@ -587,12 +587,12 @@ Package rerunfilecheck Info: File `DDMS.out' has not changed.
 (rerunfilecheck)             Checksum: A7484A06A9E1CB2673CEBE5A3B261666;2127.
  ) 
 Here is how much of TeX's memory you used:
- 21588 strings out of 402987
- 395298 string characters out of 5448525
- 811646 words of memory out of 5000000
- 49978 multiletter control sequences out of 15000+600000
+ 21592 strings out of 402987
+ 395401 string characters out of 5448525
+ 811715 words of memory out of 5000000
+ 49982 multiletter control sequences out of 15000+600000
  634354 words of font info for 75 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 84i,16n,104p,657b,476s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 84i,16n,104p,738b,448s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on DDMS.xdv (5 pages, 88980 bytes).
+Output written on DDMS.xdv (5 pages, 95824 bytes).
