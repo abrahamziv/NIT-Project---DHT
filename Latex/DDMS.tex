@@ -97,8 +97,8 @@ the observation's density can vary with $H$ is exhausted by a single comparison 
 how large the density is under $H_2$ relative to how large it is under $H_1$, at
 that particular observation. A single number is therefore inherently enough to
 hold everything that changes with $H$, and that number is, by construction,
-exactly $l^i$. (How this shows up concretely inside the paper's own machinery ---
-via Lemma~1 --- is worth treating separately once we get there.)
+exactly $l^i$. (How this shows up concretely inside the paper's own machinery --
+via Lemma~1 -- is worth treating separately once we get there.)
 
 \subsubsection*{No information loss: a Markov-chain and DPI reading}
 Sufficiency means that any two raw observations producing the same $l^i$ are, for
@@ -113,7 +113,7 @@ is trivially Markov, and the Data Processing Inequality (DPI) gives
 \begin{equation}
     I(H; l^i) \le I(H; y^i).
 \end{equation}
-Equality holds \emph{iff} $l^i$ is sufficient for $H$ --- equivalently, iff
+Equality holds \emph{iff} $l^i$ is sufficient for $H$ -- equivalently, iff
 $H \to l^i \to y^i$ is \emph{also} a Markov chain, i.e.\ $y^i$ carries no further
 information about $H$ once $l^i$ is fixed. This gives equality:
 \begin{equation}
@@ -128,24 +128,44 @@ For any fusion center decision rule $\gamma^0$,
     = \inf_{\gamma^{1:N} \in \Gamma^N_{TS}} J^N(\gamma^0, \gamma^{1:N}).
 \end{equation}
 where $\Gamma^N_{TS}$ is the class of threshold policies.
-Fixing every sensor's policy except sensor $i$'s, sensor $i$'s optimization is:
 
+\smallskip
+\noindent\textit{Why this reduction holds.} One direction is immediate: $\Gamma^N_{TS} \subseteq \Gamma^N$, so restricting the infimum to threshold policies can only raise it,
+\begin{equation}
+    \inf_{\gamma^{1:N} \in \Gamma^N} J^N(\gamma^0,\gamma^{1:N}) \;\le\; \inf_{\gamma^{1:N} \in \Gamma^N_{TS}} J^N(\gamma^0,\gamma^{1:N}).
+\end{equation}
+For the reverse direction, fix sensors $j \ne i$ to \emph{arbitrary} policies and ask what sensor $i$'s best response is. As shown below, this best response is always a threshold rule -- regardless of what the other $N-1$ sensors are doing, since the sub-problem sensor $i$ faces turns out to be linear in its own likelihood ratio $l^i$. Because this holds for any fixed configuration of the rest, we can replace each sensor's policy, one at a time, with its threshold best-response: the cost $J^N$ never increases at any step. After $N$ such replacements every sensor uses a threshold rule, and the resulting cost is no larger than that of the original arbitrary profile. Taking the infimum over the starting profile gives
+\begin{equation}
+    \inf_{\gamma^{1:N} \in \Gamma^N_{TS}} J^N(\gamma^0,\gamma^{1:N}) \;\le\; \inf_{\gamma^{1:N} \in \Gamma^N} J^N(\gamma^0,\gamma^{1:N}),
+\end{equation}
+and combined with the trivial direction, equality holds. This is the standard \emph{person-by-person optimization} argument: joint optimality follows from unilateral optimality of each coordinate, holding all others fixed.
+
+\smallskip
+\noindent Concretely, fixing every sensor's policy except sensor $i$'s, sensor $i$'s optimization is:
 \begin{align}
     \inf_{u^i \in \mathcal U} \bigg\{\sum_{j=1,2} P(H_j \mid y^i)\, E_{\gamma^{-i\star}}\big[c(H_j, \gamma^0(u^{1:N})) \mid H_j\big]\bigg\}
 \end{align}
 
 By Bayes' rule,
-$P(H_j \mid y^i)$ depends on $y^i$ only through the likelihood ratio $l^i$ ---
-this is exactly the sufficiency of $l^i$ from Section~\ref{sec:sufficient-statistic} showing up again,
-now inside the optimization itself. Substituting reduces the problem to
+\begin{equation}
+    P(H_j \mid y^i) = \frac{f_{y^i|H}(y^i \mid H_j)\,P(H_j)}{f_{y^i}(y^i)}, \qquad j=1,2,
+\end{equation}
+and taking the ratio of the two, the normalizer $f_{y^i}(y^i)$ cancels:
+\begin{equation}
+    \frac{P(H_2 \mid y^i)}{P(H_1\mid y^i)} = \frac{f_{y^i|H}(y^i\mid H_2)}{f_{y^i|H}(y^i\mid H_1)}\cdot\frac{P(H_2)}{P(H_1)} = l^i \cdot \frac{P(H_2)}{P(H_1)}.
+\end{equation}
+So the ratio of posteriors -- all that matters for comparing the two terms in the sum above -- depends on $y^i$ only through the likelihood ratio $l^i$: exactly the sufficiency of $l^i$ from Section~\ref{sec:sufficient-statistic}, showing up again inside the optimization itself.
+
+Writing $g^i(H_j,u^i) \triangleq E_{\gamma^{-i\star}}[c(H_j,\gamma^0(u^{1:N}))\mid H_j]$ for the expected cost of action $u^i$ under $H_j$ given the other sensors' fixed policies, and factoring the positive term $P(H_1\mid y^i)$ out of the sum (it does not affect the $\arg\inf$),
+\begin{equation}
+    \sum_{j=1,2} P(H_j\mid y^i)\,g^i(H_j,u^i) = P(H_1\mid y^i)\left[g^i(H_1,u^i) + \frac{P(H_2\mid y^i)}{P(H_1\mid y^i)}\,g^i(H_2,u^i)\right].
+\end{equation}
+Dropping the positive prefactor $P(H_1\mid y^i)$ and substituting the ratio derived above, the sub-problem reduces to
 \begin{equation}
     \inf_{u^i \in \mathcal U} \left[ g^i(H_1, u^i) + g^i(H_2, u^i)\, l^i\,
-    \frac{P(H_2)}{P(H_1)} \right],
+    \frac{P(H_2)}{P(H_1)} \right].
 \end{equation}
-where $g^i(H_j, u^i)$ is the expected cost of action $u^i$ under $H_j$ given the
-other sensors' fixed policies. This is linear in $l^i$ for each action, so the
-best action is whichever line is lowest at that value of $l^i$, switching only
-at the points where lines cross --- a threshold rule.
+This is linear in $l^i$ for each action, so the best action is whichever line is lowest at that value of $l^i$, switching only at the points where lines cross -- a threshold rule.
 \subsubsection*{Lemma 2}
 Under the assumptions above, for any deterministic encoding policy of the sensors, the optimal policy of the fusion center is given by:
 \begin{align}
@@ -185,8 +205,8 @@ Here, (14) follows from Bayes' rule, and (15) from $y^i$ being i.i.d. given $H$.
 And this sums up how the optimal decision rule of the FC is established. It is important to note that this decision rule is why assumption (v) is important for the paper's solution:
 in order to calculate $\DN$, the FC must know how $u^i$ was derived, to give it its proper weight in the decision process.
 \subsection{Existence of an Optimal Solution}
-Lemmas 1 and 2 tell us where to look; Theorem 1, via the compactness result of Lemma 3, is what guarantees something is actually there to find.\\
-\subsubsection*{Lemma 3}
+Lemmas 1 and 2 characterize the necessary structure of an optimal policy -- threshold at the sensors, MAP at the FC. Theorem 1, using the compactness result of Lemma 3, establishes that a minimizer with this structure exists.
+\\\subsubsection*{Lemma 3}
 \begin{center}
     $\Gamma^N_{TS}$ is compact under total variation.
 \end{center}
