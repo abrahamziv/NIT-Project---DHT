@@ -25,9 +25,7 @@
 Hypothesis Testing problems address the problem of deciding, based on observations, which of two or more probability laws have generated
 the observed data.
 \subsection{Decentralized Remote Hypothesis Testing}
-In our work, we are going to discuss the results of the paper "Decentralized Detection with Many Sensors: Optimality of Exchangeable and Identical Encoding Policies" [1].
-The paper addresses a problem of Decentralized Hypothesis Testing - many sensors observe an environment, compress the observation into an action, and send the actions to
-a fusion center (FC). The FC decides between two hypotheses - $H_1$ or $H_2$.
+In our critical summary, we discuss the results of the paper "Decentralized Detection with Many Sensors: Optimality of Exchangeable and Identical Encoding Policies" [1]. The paper addresses the problem of Decentralized Hypothesis Testing: many sensors observe an environment, compress their observations into actions, and send those actions to a fusion center (FC), which decides between two hypotheses, $H_1$ and $H_2$. While the paper's authors build tools for both the finite and infinite number of sensors regimes, in our work we focus on the finite-$N$ setting.
 
 \section{Problem Setup}
 
@@ -198,4 +196,15 @@ Lemma 3 is an important step towards establishing the \textbf{existence} of an o
 There exists an optimal decision rule sequence $\gamma^{0:N\star} = (\gamma^{0\star},\gamma^{1\star},\dots, \gamma^{N\star})$. These policies are MAP for the FC and threshold for the sensors.\\
 The proof of Theorem 1 comes from Lemmas 1 and 2, regarding how the optimal decision rule sequences behave, and ensures the existence of such a decision rule sequence by showing that the infimum of $J^N(\gamma^{0:N})$ is continuous in the sensors' policies,
 and using Weierstrass's extreme value theorem, it is shown that it must attain a minimum there.
+
+\begin{thebibliography}{9}
+
+\bibitem{sanjari2025}
+S.~Sanjari, N.~Saldi, S.~Gezici, and S.~Y\"uksel, ``Decentralized Detection with Many Sensors: Optimality of Exchangeable and Identical Encoding Policies,'' \emph{arXiv preprint arXiv:2509.21724}, Sep. 2025.
+
+\bibitem{tsitsiklis1989}
+J.~N.~Tsitsiklis, ``Decentralized Detection,'' Laboratory for Information and Decision Systems, Massachusetts Institute of Technology, Cambridge, MA, Tech. Rep. LIDS-P-1913, Sep. 1989. To appear in \emph{Advances in Statistical Signal Processing, Vol. 2: Signal Detection}, H.~V.~Poor and J.~B.~Thomas, Eds.
+
+\end{thebibliography}
+
 \end{document}
