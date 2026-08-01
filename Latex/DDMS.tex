@@ -11,6 +11,7 @@
 
 \newcommand{\HS}{H^\star}
 \newcommand{\DN}{\Delta_N(u^{1:N};\gamma^{1:N})}
+\newcommand{\JN}{J^N(\gamma^{0:N})}
 \newcommand{\JNEE}{J^N_{EE}(\gamma^{0:N})}
 
 \title{Critical Summary: Decentralized Detection with Many Sensors}
@@ -21,7 +22,7 @@
 \maketitle
 
 \section{Introduction - Decentralized Remote Hypothesis Testing}
-In our critical summary, we discuss the results of the paper "Decentralized Detection with Many Sensors: Optimality of Exchangeable and Identical Encoding Policies" [1]. 
+In our critical summary, we discuss the results of the paper ``Decentralized Detection with Many Sensors: Optimality of Exchangeable and Identical Encoding Policies'' [1]. 
 The paper addresses the problem of Decentralized Hypothesis Testing: many sensors observe an environment, compress their observations into actions, 
 and send those actions to a fusion center (FC), which decides between two hypotheses, $H_1$ and $H_2$. While the paper's authors build 
 tools for both the finite and infinite number of sensors regimes, in our work we focus on the 
@@ -29,14 +30,14 @@ finite-$N$ setting. %How to address asaf's note of n -> infty?
 
 \section{Problem Setup}
 
-Assuming there are two hypotheses, $H_1$ and $H_2$,
-the true one can be regarded as $\HS$, a random variable with $P(\HS = H_1) = p$, $P(\HS = H_2) = 1-p$. The system setup is:
+Suppose there are two hypotheses, $H_1$ and $H_2$;
+the true one is modeled as $\HS$, a random variable with $P(\HS = H_1) = p$, $P(\HS = H_2) = 1-p$. The system setup is:
 \begin{itemize}
-    \item $N < \infty$ sensors, each makes an observation of the environment denoted by $y^i \in \mathcal{Y}^i$ as the observation of the $i$-th sensor for $i \in \{1,\dots, N\}$.
-    \item Each sensor quantizes its observation using a mapping $\gamma^i: \mathcal{Y}^i \to \mathcal{U}^i$, $\mathcal{U}^i$ being the set of actions the sensor can send.
+    \item $N < \infty$ sensors, each observing the environment and producing $y^i \in \mathcal{Y}^i$, the observation of the $i$-th sensor, for $i \in \{1,\dots, N\}$.
+    \item Each sensor quantizes its observation using a mapping $\gamma^i: \mathcal{Y}^i \to \mathcal{U}^i$, where $\mathcal{U}^i$ denotes the set of actions the sensor can send.
     $\gamma^i$ is the decision rule / policy of the $i$-th sensor.
-    \item The FC's policy is noted as $\gamma^0: \mathcal{U}^0 \times \mathcal{U}^1 \times \dots \mathcal{U}^N \to \{1,2\}$.\\
-    Essentially, the fusion center decides $u_0 = \gamma^0(u^{1:N}), u_0 \in \{1,2\}$.\\
+    \item The FC's policy is noted as $\gamma^0: \mathcal{U}^0 \times \mathcal{U}^1 \times \dots \times \mathcal{U}^N \to \{1,2\}$.\\
+    Essentially, the fusion center decides $u^0 = \gamma^0(u^{1:N}), u^0 \in \{1,2\}$.\\
     Denote the set $\Gamma^i$ as the set of policies of sensor $i$, $\Gamma^0$ as the set of policies for the FC.
     \item The cost function we will focus on is:
     \begin{align}
@@ -51,7 +52,7 @@ the true one can be regarded as $\HS$, a random variable with $P(\HS = H_1) = p$
         J^N(\gamma^{0:N}) \triangleq \mathbb{E}[c(H,u^0)]
     \end{align}
 \end{itemize}
-
+\newpage
 \subsection{Assumptions}
 In order to make the problem tractable, the authors of the paper consider a few assumptions:
 \begin{enumerate}[label=(\roman*)]
@@ -63,42 +64,43 @@ In order to make the problem tractable, the authors of the paper consider a few 
         l^i = L(y^i) := \frac{f_{y^i|H}(y^i|H_2)}{f_{y^i|H}(y^i|H_1)} \text{ a.s.}
     \end{align}
     is well-behaved and invertible.
-    \item Define $I_N^{KCR} \triangleq \{u^{1:N},\gamma^{1:N}\}$ to be the Known Common Randomization set, that includes all actions and policies of the sensors. We assume this set is known to the FC.
+    \item Define $I_N^{KCR} \triangleq \{u^{1:N},\gamma^{1:N}\}$ to be the Known Common Randomization set, which includes all actions and policies of the sensors. We assume this set is known to the FC.
 \end{enumerate}
-While (i) is a common assumption in order to simplify the math and making it tractable, assumptions (ii) and (iv) are essential in order for $l^i$ to be a sufficient statistic of $y^i$, as will be discussed later.
-Assumption (iii) dictates that all sensors have the same action set, underlying assumption about the compression and rate being used. This will be discussed furthermore in section *, where we will offer some modifications for the solution setup. 
+While (i) is a common assumption in order to simplify the math and make it tractable, assumptions (ii) and (iv) are essential in order for $l^i$ to be a sufficient statistic of $y^i$, as will be discussed later.
+Assumption (iii) dictates that all sensors have the same action set, an underlying assumption about the compression and rate being used. This will be discussed further in section *, where we will offer some modifications for the solution setup.
 Assumption (v)'s essentiality will be discussed in Section~\ref{sec:threshold-map}.
 
 \section{Sufficient Statistics, Existence of an Optimal Encoding Policy}
 
 \subsection{Exponential Decay of the Error Probability}
+\label{sec:exp-decay}
 According to the law of large numbers, we can expect that $J^N(\gamma^{0:N})$ will
-converge to the probability of error under decision rules $\gamma^{0:N}$. Also, under the criterion of minimizing the probability of error,
-using the MAP rule at the fusion center is optimal for any sensor policy [2,8-10].\newline \newline
+converge to the probability of error $P_e$ under decision rules $\gamma^{0:N}$. Also, under the criterion of minimizing the probability of error,
+using the MAP rule at the fusion center is optimal for any sensor policy [2].\newline \newline
 \textbf{[Proposition 5.1, 2]} - If $y^1,\dots,y^N$ are i.i.d. given $\HS$ and $P_{Y|H_1} \neq P_{Y|H_2}$, then there exists a decision rule $\gamma'$ and constants $\alpha, \beta > 0$ independent of $N$ such that
 if all sensors use $\gamma'$ and the FC uses MAP then: $P_e < \alpha e^{-N\beta}$.\newline \newline
 From [Proposition 5.1, 2], we can conclude that:
 
 \begin{align}
-     J^{N\star}(\gamma^{0:N}) = \inf_{\gamma^{0:N}}\{J^N(\gamma^{0:N})\} \leq J^{N}({\gamma^{0:N}}') < \alpha e^{-N \beta}
+     J^{N\star}(\gamma^{0:N}) = \inf_{\gamma^{0:N}}\{J^N(\gamma^{0:N})\} \leq J^{N}({\gamma'}^{0:N}) < \alpha e^{-N \beta} \label{eq:jnstar-bound}
 \end{align}
-From equation (4) we can understand that $P_e$ of any relevant sequence of policies is exponentially decaying as $N$ grows large, hence we 
-need to study and optimize the \textbf{Error Exponent}, to study how fast the error will decay given a sequence of policies. This leads to the definition:
-\begin{align}
-    J^N_{EE}(\gamma^{0:N}) = \frac{\log(J^N(\gamma^{0:N}))}{N}
-\end{align}
-We should notice that $J^N(\gamma^{0:N})\leq 1$ is a probability measure meaning its $\log$ is negative, hence we want to minimize $\JNEE$ to get a faster decay rate.
+From Equation~\eqref{eq:jnstar-bound} we can understand that $P_{e}$ of any relevant sequence of policies is exponentially decaying as $N$ grows large, hence we
+need to study and optimize the \textbf{Error Exponent}, which characterizes how fast the error will decay given a sequence of policies. This leads to the definition:
+\begin{equation}
+    J_{EE}^{N}(\gamma^{0:N}) \triangleq -\frac{1}{N}\log(J^{N}(\gamma^{0:N})) \label{eq:error-exponent-def}
+\end{equation}
+We should notice that $J^{N}(\gamma^{0:N}) \le 1$ is a probability measure meaning its $\log$ is negative. By adding the negative sign, $J_{EE}^{N}(\gamma^{0:N})$ becomes a strictly positive rate. Hence, our goal is to maximize $J_{EE}^{N}(\gamma^{0:N})$ to achieve the fastest possible exponential decay of the error probability.
 \subsection{$l^i$ is a Sufficient Statistic}
 \label{sec:sufficient-statistic}
 $l^i$ is a sufficient statistic of $H$: once its value is known, nothing else
 about the raw observation $y^i$ can further move one's belief about which
-hypothesis is true. With only two hypotheses on the table, the entire way in which
-the observation's density can vary with $H$ is exhausted by a single comparison -
+hypothesis is true. With only two hypotheses under consideration, the entire way in which
+the observation's density can vary with $H$ is exhausted by a single comparison --
 how large the density is under $H_2$ relative to how large it is under $H_1$, at
 that particular observation. A single number is therefore inherently enough to
 hold everything that changes with $H$, and that number is, by construction,
 exactly $l^i$. (How this shows up concretely inside the paper's own machinery --
-via Lemma~1 -- is worth treating separately once we get there.)
+via Lemma~1 -- is worth treating separately in a later section.)
 
 \subsubsection*{No information loss: a Markov-chain and DPI reading}
 Sufficiency means that any two raw observations producing the same $l^i$ are, for
@@ -179,7 +181,7 @@ for some $t \in \mathbb{R}$ and $\DN$ given by:
 \begin{align}
     \DN \triangleq \frac{1}{N}\sum_{i=1}^{N}\log \frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)}
 \end{align}
-Recalling that in [2,8-10] it was established that the MAP rule is optimal for any deterministic sensor policy.
+Recalling that in [2] it was established that the MAP rule is optimal for any deterministic sensor policy.
 The MAP rule for our problem is:
 \begin{align}
     \gamma^{0\star}(u^{1:N}) = \arg\max_{i \in \{1,2\}}P(H_i|u^{1:N})
@@ -194,13 +196,13 @@ It can be written in the form of a log likelihood decision rule:
 \end{align}
 And looking at the log likelihood:
 \begin{align}
-    \log \frac{P(H_1|u^{1:N})}{P(H_2|u^{1:N})} &= \log \frac{P(u^{1:N}|H_1)}{P(u^{1:N}|H_2)} + \log\frac{P(H_1)}{P(H_2)} \\
-    &= \log \prod _{i = 1}^{N} \frac{P(u^i|H_1)}{P(u^i|H_2)} + \underbrace{\log\frac{p}{1-p}}_{\triangleq -Nt} \\
-    &= \sum_{i=1}^{N}\log\frac{P(u^i|H_1)}{P(u^i|H_2)} - Nt
+    \log \frac{P(H_1|u^{1:N})}{P(H_2|u^{1:N})} &= \log \frac{P(u^{1:N}|H_1)}{P(u^{1:N}|H_2)} + \log\frac{P(H_1)}{P(H_2)} \label{eq:bayes-step}\\
+    &= \log \prod _{i = 1}^{N} \frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)} + \underbrace{\log\frac{p}{1-p}}_{\triangleq -Nt} \label{eq:iid-step}\\
+    &= \sum_{i=1}^{N}\log\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)} - Nt
 \end{align}
-Here, (14) follows from Bayes' rule, and (15) from $y^i$ being i.i.d. given $H$. We should just note that:
+Here, Equation~\eqref{eq:bayes-step} follows from Bayes' rule, and Equation~\eqref{eq:iid-step} from $y^i$ being i.i.d. given $H$. We should just note that:
 \begin{align}
-    \sum_{i=1}^{N}\log\frac{P(u^i|H_1)}{P(u^i|H_2)} - Nt \geq 0 \iff \frac{1}{N}\sum_{i=1}^{N}\log\frac{P(u^i|H_1)}{P(u^i|H_2)} \geq t
+    \sum_{i=1}^{N}\log\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)} - Nt \geq 0 \iff \frac{1}{N}\sum_{i=1}^{N}\log\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)} \geq t
 \end{align}
 And this sums up how the optimal decision rule of the FC is established. It is important to note that this decision rule is why assumption (v) is important for the paper's solution:
 in order to calculate $\DN$, the FC must know how $u^i$ was derived, to give it its proper weight in the decision process.
@@ -214,8 +216,113 @@ Lemma 3 is an important step towards establishing the \textbf{existence} of an o
 
 \subsubsection*{Theorem 1}
 There exists an optimal decision rule sequence $\gamma^{0:N\star} = (\gamma^{0\star},\gamma^{1\star},\dots, \gamma^{N\star})$. These policies are MAP for the FC and threshold for the sensors.\\
-The proof of Theorem 1 comes from Lemmas 1 and 2, regarding how the optimal decision rule sequences behave, and ensures the existence of such a decision rule sequence by showing that the infimum of $J^N(\gamma^{0:N})$ is continuous in the sensors' policies,
-and using Weierstrass's extreme value theorem, it is shown that it must attain a minimum there.
+The proof of Theorem 1 follows from Lemmas 1 and 2, together with the compactness of $\Gamma^N_{TS}$ (Lemma 3). Since $J^N(\gamma^{0:N})$ is continuous in the sensors' policies over this compact set, Weierstrass's extreme value theorem guarantees that the infimum is attained.
+\section{Calculating the error exponent}
+\label{sec:error-exponent}
+Under assumptions (i) - (v) and Theorem 1, we can formulate a closed-form bound for the error exponent. 
+Bounding each of the two error events with a Chernoff bound, in terms of a policy-dependent Chernoff coefficient 
+$M(\alpha,\gamma^i)$, and combining them gives a bound on $P_e$. Taking $-\frac{1}{N}\log(\cdot)$ of this bound and letting $N \to \infty$ yields, 
+for $K$ distinct policies used by fractions $c_k$ of the sensors:
+\begin{align}
+    \lim_{N \to \infty}\JNEE \geq -\min_{\alpha \in [0,1]}\sum_{k=1}^{K} c_k \log M(\alpha,\gamma^k) \label{eq:error-exponent-bound}
+\end{align}
+Where
+\begin{align}
+    M(\alpha,\gamma^i) \triangleq \sum_{u \in \mathcal{U}} P^{\gamma^i}(u^i|H_2)^{1-\alpha}P^{\gamma^i}(u^i|H_1)^{\alpha}
+\end{align}
+The full derivation is given in Appendix~\ref{app:error-exponent}.\newline
+We can use the bound in Equation~\eqref{eq:error-exponent-bound} to get a closed form bound of the exponent in Equation~\eqref{eq:jnstar-bound}. Assuming all the sensors policies are identical,
+$K = 1, c_1 = 1$ and we get the definition of \textbf{Chernoff Distance} [3]:
+\begin{align*}
+    \lim_{N \to \infty}\JNEE \geq -\min_{\alpha \in [0,1]}\log M(\alpha,\gamma) = C(P^\gamma_{Y|H_1},P^\gamma_{Y|H_2})
+\end{align*}
+\subsection*{Discussion of the result}
+\begin{align}
+    C(P^\gamma_{Y|H_1},P^\gamma_{Y|H_2}) = -\min_{\alpha \in [0,1]}\log\bigg(\sum_{u \in \mathcal{U}} P^{\gamma}(u^i|H_2)^{1-\alpha}P^{\gamma}(u^i|H_1)^{\alpha}\bigg)
+\end{align}
+As defined in [3], the Chernoff distance (Chernoff information) is a measure of \textbf{distinguishability} between two probability distributions;\newline
+If $P(u^i|H_1) = 1$, the hypotheses are perfectly distinguishable, so $P(u^i|H_2) = 0$: the sum inside the logarithm vanishes, the error exponent diverges, and $P_e \to 0$.\newline
+On the other hand, if $P(u^i|H_1) = P(u^i|H_2)$ for all $u \in \mathcal{U}$, the hypotheses are indistinguishable: the sum equals 1, the error exponent vanishes, and $P_e$ fails to decay.\newline
+For any other conditional probabilities, the Chernoff distance provides a solid bound on the error exponent.\newline
+This result is highly intuitive: as the quantized observations under each hypothesis become more distinguishable, the Chernoff distance grows. This yields a larger error exponent, which drives a steeper exponential decay in the probability of error. In practical terms, greater distinguishability at the sensor level guarantees an exponentially better detection performance as the number of sensors grows.
+
+\newpage
+\section{Appendix}
+\subsection{Full Derivation of the Error Exponent}
+\label{app:error-exponent}
+\subsubsection*{Error I - $P(\gamma^0(u^{0:N}) = 1|H_2)$}
+Recalling that the optimal decision rule dictates that $\gamma^0(u^{0:N}) = 1$ if:
+\begin{align}
+    \sum_{i=1}^{N}\log\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)} > Nt
+\end{align}
+Applying the Chernoff bound with $\alpha > 0$:
+\begin{align}
+    P(\gamma^0(u^{0:N}) = 1|H_2) = P\bigg(\sum_{i=1}^{N}\log\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)} > Nt\bigg|H_2\bigg) \leq E_{H_2}\bigg[\exp\bigg(\alpha \sum_{i=1}^{N}\log\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)}\bigg)\bigg]e^{-\alpha Nt}
+\end{align}
+From the independence of $y^i|H$:
+\begin{align}
+    E_{H_2}\bigg[\exp\bigg(\alpha \sum_{i=1}^{N}\log\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)}\bigg)\bigg] = \prod_{i=1}^{N}E_{H_2}\bigg[\exp\bigg(\alpha \log\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)}\bigg)\bigg] = \prod_{i=1}^{N}E_{H_2}\bigg[\bigg(\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)}\bigg)^\alpha\bigg]
+\end{align}
+We can calculate a single expectation:
+\begin{align}
+    E_{H_2}\bigg[\bigg(\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)}\bigg)^\alpha\bigg] = \sum_{u \in \mathcal{U}} P^{\gamma^i}(u^i|H_2)\bigg(\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)}\bigg)^\alpha = \sum_{u \in \mathcal{U}} P^{\gamma^i}(u^i|H_2)^{1-\alpha}P^{\gamma^i}(u^i|H_1)^{\alpha}
+\end{align}
+We now define the policy-dependent Chernoff coefficient $M(\alpha,\gamma^i) \triangleq \sum_{u \in \mathcal{U}} P^{\gamma^i}(u^i|H_2)^{1-\alpha}P^{\gamma^i}(u^i|H_1)^{\alpha}$, the probability of Error I is bound by:
+\begin{align}
+    P(\gamma^0(u^{0:N}) = 1|H_2) \leq \prod_{i=1}^{N}M(\alpha,\gamma^i)e^{-\alpha Nt}
+\end{align}
+
+\subsubsection*{Error II - $P(\gamma^0(u^{0:N}) = 2|H_1)$}
+In a similar manner, $\gamma^0(u^{0:N}) = 2$ if:
+\begin{align}
+    \sum_{i=1}^{N}\log\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)} < Nt \iff -\sum_{i=1}^{N}\log\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)} > -Nt
+\end{align}
+Applying the Chernoff bound with $\beta > 0$:
+\begin{align}
+    P(\gamma^0(u^{0:N}) = 2|H_1) = P\bigg(-\sum_{i=1}^{N}\log\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)} > -Nt\bigg|H_1\bigg) \leq E_{H_1}\bigg[\exp\bigg(-\beta \sum_{i=1}^{N}\log\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)}\bigg)\bigg]e^{\beta Nt}
+\end{align}
+To align our results, we demand $\beta = 1-\alpha$, resulting in $\alpha < 1$. From the independence of $y^i|H$:
+\begin{align}
+    E_{H_1}\bigg[\exp\bigg(-\beta \sum_{i=1}^{N}\log\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)}\bigg)\bigg] = \prod_{i=1}^{N}E_{H_1}\bigg[\bigg(\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)}\bigg)^{(\alpha-1)}\bigg]
+\end{align}
+The expectation:
+\begin{align}
+    E_{H_1}\bigg[\bigg(\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)}\bigg)^{(\alpha - 1)}\bigg] &= \sum_{u \in \mathcal{U}}P^{\gamma^i}(u^i|H_1)\bigg(\frac{P^{\gamma^i}(u^i|H_1)}{P^{\gamma^i}(u^i|H_2)}\bigg)^{(\alpha - 1)} \\
+    &= \sum_{u \in \mathcal{U}} P^{\gamma^i}(u^i|H_2)^{1-\alpha}P^{\gamma^i}(u^i|H_1)^{\alpha} = M(\alpha,\gamma^i)
+\end{align}
+The resulting bound for Error II is:
+\begin{align*}
+    P(\gamma^0(u^{0:N}) = 2|H_1) \leq \prod_{i=1}^{N}M(\alpha,\gamma^i)e^{(1-\alpha)Nt}
+\end{align*}
+
+\subsubsection*{Error probability bound}
+The probability of error is $P_e = (1-p)\cdot P(\gamma^0(u^{0:N}) = 1|H_2) + p\cdot P(\gamma^0(u^{0:N}) = 2|H_1)$, applying the bounds:
+\begin{align}
+    P_e \leq (1-p)\cdot \prod_{i=1}^{N}M(\alpha,\gamma^i)e^{-\alpha Nt} + p\cdot \prod_{i=1}^{N}M(\alpha,\gamma^i)e^{(1-\alpha) Nt}\\
+    = e^{-\alpha Nt}\bigg((1-p) + pe^{Nt}\bigg) \prod_{i=1}^{N}M(\alpha,\gamma^i)\\
+    = (\frac{p}{1-p})^\alpha\cdot2(1-p)\prod_{i=1}^{N}M(\alpha,\gamma^i)\\
+    =2\cdot p^\alpha \cdot (1-p)^{1-\alpha}\prod_{i=1}^{N}M(\alpha,\gamma^i)
+\end{align}
+Recalling that $Nt = \log\frac{1-p}{p}$ yields $e^{-\alpha Nt} = (\frac{p}{1-p})^\alpha$ and $e^{Nt} = (\frac{1-p}{p})$, and $\alpha \in [0,1]$.
+
+\subsubsection*{Error Exponent}
+Recalling the discussion in Section~\ref{sec:exp-decay}, we can now bound the error exponent:
+
+\begin{align}
+    \JNEE  = -\frac{1}{N}\log(P_e) \geq -\frac{1}{N}\log(2) -\frac{1}{N}\log(p^\alpha (1-p)^{1-\alpha})-\frac{1}{N}\log\bigg( \prod_{i=1}^{N}M(\alpha,\gamma^i) \bigg)
+\end{align}
+
+Taking the limit will cause the constants to vanish resulting in:
+
+\begin{align}
+    \lim_{N \to \infty}\JNEE &\geq\lim_{N \to \infty} -\frac{1}{N}\log\bigg( \prod_{i=1}^{N}M(\alpha,\gamma^i) \bigg)\\
+    &= \lim_{N \to \infty} -\frac{1}{N}\sum_{i=1}^{N} \log(M(\alpha,\gamma^i))
+\end{align}
+Assuming there are $K$ different policies, and $N_k$ sensors using each, meaning $\sum_{k=1}^{K}N_k = N$.\\
+Define $\lim_{N \to \infty}\frac{N_k}{N} \triangleq c_k$ we get:
+\begin{align}
+    \lim_{N \to \infty}\JNEE \geq -\min_{\alpha \in [0,1]}\sum_{k=1}^{K} c_k \log M(\alpha,\gamma^k)
+\end{align}
 
 \begin{thebibliography}{9}
 
@@ -224,6 +331,9 @@ S.~Sanjari, N.~Saldi, S.~Gezici, and S.~Y\"uksel, ``Decentralized Detection with
 
 \bibitem{tsitsiklis1989}
 J.~N.~Tsitsiklis, ``Decentralized Detection,'' Laboratory for Information and Decision Systems, Massachusetts Institute of Technology, Cambridge, MA, Tech. Rep. LIDS-P-1913, Sep. 1989. To appear in \emph{Advances in Statistical Signal Processing, Vol. 2: Signal Detection}, H.~V.~Poor and J.~B.~Thomas, Eds.
+
+\bibitem{chernoff1952}
+H.~Chernoff, ``A Measure of Asymptotic Efficiency for Tests of a Hypothesis Based on the Sum of Observations,'' \emph{Annals of Mathematical Statistics}, vol.~23, no.~4, pp.~493--507, Dec. 1952.
 
 \end{thebibliography}
 
