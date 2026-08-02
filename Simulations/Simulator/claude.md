@@ -52,6 +52,10 @@ $y \sim \mathcal{N}(0, \sigma^2)$ under $H_1$, $y \sim \mathcal{N}(\mu, \sigma^2
   $$F_j(t) = \Phi\!\left( \frac{y_t - m_j}{\sigma} \right), \qquad m_1 = 0,\; m_2 = \mu.$$
   Handle $t \le 0 \Rightarrow F_j(t) = 0$.
 - **Chernoff information.** $C = \mu^2 / (8\sigma^2)$.
+### `DiscreteLR(p1, p2, p=0.5)`
+ 
+Finite observation alphabet given by two pmfs; $l$ takes the finitely many values $p_2(y)/p_1(y)$ (with $\infty$ where $p_1(y) = 0$). Needed to run Example 1 of the paper, which is the fusion-center regression anchor.
+ 
 ### Tests
  
 1. $\hat{\mathbb{E}}_{H_1}[l] \to 1$ over many samples.
@@ -204,9 +208,9 @@ Report $-\log J^N$ rather than $J^N_{EE}$ when comparing schemes: dividing by $N
 ### Tests
 
 1. $N = 1$: $J^N$ matches direct two-symbol computation.
-2. $N = 2$ with Example 1 parameters: reproduces $0.21$, $0.23$, $0.22$.
+2. $N = 2$ with Example 1 parameters: reproduces the exact values $19/90$ (asymmetric), $2/9$ (both B), $53/225$ (both A) at `rtol=1e-12`, and the ordering asymmetric $<$ B $<$ A. These are the paper's rounded $0.21$, $0.22$, $0.23$ — note $53/225 = 0.2356$ actually rounds to $0.24$; the paper's $0.23$ is a truncation.
 3. Empirical path converges to `log_error_prob` at small $N$ and low SNR.
-4. `total_exponent` $\le$ `chernoff_bound`.
+4. `total_exponent` $\ge$ `chernoff_bound`. (At $p = 1/2$ the Chernoff bound, DDMS eqs. 37–40, upper-bounds $J^N$ for every $N$, so the achieved exponent is at least the bound.)
 5. Trivial bank ($M = 1$): $J^N = \min(p, 1-p)$.
 6. Grouped and heterogeneous code paths agree on the same identical bank.
 7. `decide` and the exact path use the same $t$; changing `t` moves both consistently.
@@ -225,8 +229,9 @@ src/ddms/model.py       # Statistical Model
 src/ddms/encoder.py     # Encoder, EncoderBank
 src/ddms/fusion.py      # Fusion Center
 src/ddms/sweep.py       # parameter sweeps, returns arrays
+src/ddms/runs.py        # save_run / load_run: timestamped run directories
 figs/                   # one script per figure
-figs/out/               # generated PDFs, gitignored
+runs/                   # one directory per sweep run: data.json + figures, committed
 tests/
 docs/PLAN.md
 ```
@@ -253,8 +258,9 @@ One module per class, matching the sections of this document.
  
 The three classes are a pure computation pipeline and never touch the filesystem or matplotlib. Two layers sit above them:
  
-- **`sweep.py`** — plain functions (`sweep_over_N`, `sweep_over_rate`, `sweep_over_snr`) returning arrays. This is where the nontrivial logic lives: building the right bank at each point, matching total rate across schemes. Tested.
-- **`figs/fig_*.py`** — one script per figure, roughly 30 lines each: call a sweep, plot, save a vector PDF to `figs/out/` for direct LaTeX inclusion. Run with `python figs/fig_name.py`. Default matplotlib styling. Disposable; anything ad hoc (annotations, insets, closed-form overlays) lives here and never leaks into code that produces reported numbers.
+- **`sweep.py`** — plain functions (`sweep_over_N`, `sweep_over_rate`, `sweep_over_snr`) returning arrays. This is where the nontrivial logic lives: building the right bank at each point, matching total rate across schemes. Tested. Never touches the filesystem.
+- **`runs.py`** — `save_run(results, label, meta)` writes a sweep's raw arrays plus metadata to `runs/<timestamp>_<label>/data.json` and returns the run directory; figure scripts save their PDFs into that same directory. `load_run(dir)` restores the arrays. Every reported figure therefore sits next to the exact JSON that produced it, so runs made on different branches (different encoders) can be pulled together and overlaid later — `figs/fig_compare_runs.py` does exactly that. `runs/` is committed, not gitignored.
+- **`figs/fig_*.py`** — one script per figure, roughly 30 lines each: call a sweep, `save_run`, plot, save a vector PDF into the run directory for direct LaTeX inclusion. Run with `python figs/fig_name.py`. Default matplotlib styling. Disposable; anything ad hoc (annotations, insets, closed-form overlays) lives here and never leaks into code that produces reported numbers.
 No caching until a sweep is measurably slow.
  
 ### Guards
