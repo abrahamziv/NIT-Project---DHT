@@ -34,10 +34,10 @@ def snr_of(run):
 
 def find_pairs():
     vanilla_dirs = sorted(
-        d for d in glob.glob("runs/*_vanilla_exponent_vs_N*") if Path(d).is_dir()
+        d for d in glob.glob("runs/**/*_vanilla_exponent_vs_N*", recursive=True) if Path(d).is_dir()
     )
     silence_dirs = sorted(
-        d for d in glob.glob("runs/*_silence_exponent_vs_N*") if Path(d).is_dir()
+        d for d in glob.glob("runs/**/*_silence_exponent_vs_N*", recursive=True) if Path(d).is_dir()
     )
     vanilla = [(d, load_run(d)) for d in vanilla_dirs]
     silence = [(d, load_run(d)) for d in silence_dirs]
@@ -54,13 +54,15 @@ pairs = find_pairs()
 print(f"combining {len(pairs)} SNR point(s): {[p[0] for p in pairs]} dB")
 
 stamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+date = stamp[:10]
 manifest = {
     "combined_from": [
         {"snr_db": snr, "vanilla_run": vd, "silence_run": sd} for snr, _, vd, _, sd in pairs
     ]
 }
 
-pages_dir = Path("runs") / f"{stamp}_all_snr_combined"
+group_dir = Path("runs") / "M2" / f"all_snr_summary_M2_{date}"
+pages_dir = group_dir / f"{stamp}_all_snr_combined"
 pages_dir.mkdir(parents=True)
 with PdfPages(pages_dir / "fig_all_snr_pages.pdf") as pdf:
     for snr, vr, vd, sr, sd in pairs:
@@ -87,7 +89,7 @@ with PdfPages(pages_dir / "fig_all_snr_pages.pdf") as pdf:
         plt.close(fig)
 (pages_dir / "sources.json").write_text(json.dumps(manifest, indent=2))
 
-overlay_dir = Path("runs") / f"{stamp}_all_snr_overlay"
+overlay_dir = group_dir / f"{stamp}_all_snr_overlay"
 overlay_dir.mkdir(parents=True)
 colors = plt.cm.viridis(np.linspace(0, 1, len(pairs)))
 

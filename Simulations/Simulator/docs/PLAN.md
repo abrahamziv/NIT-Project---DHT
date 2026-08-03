@@ -28,11 +28,16 @@ to be filled in later.
 7. **Tests** — one file per section, per the lists in `claude.md`;
    Example 1 as the regression anchor. Done.
 8. **Run persistence** (`runs.py`) — every sweep is saved via
-   `save_run(results, label, meta)` to a fresh `runs/<timestamp>_<label>/`
-   directory holding `data.json` (raw arrays + metadata) with figure PDFs
-   saved alongside; `load_run` restores arrays and
-   `figs/fig_compare_runs.py` overlays several runs. Run directories are
-   committed so branches testing different encoders can be compared. Done.
+   `save_run(results, label, meta, group=None, session=None)` to a fresh
+   `runs/<session>/<group>_<date>/<timestamp>_<label>/` directory holding
+   `data.json` (raw arrays + metadata) with figure PDFs saved alongside;
+   `group` names the simulation's parameters and defaults to `label`,
+   `date` is day-only so a simulation's runs from one day share a parent
+   folder, `session` buckets by encoder family (e.g. `M2`, `M4`) so
+   unrelated families never interleave alphabetically; `load_run`
+   restores arrays and `figs/fig_compare_runs.py` overlays several runs.
+   Run directories are committed so branches testing different encoders
+   can be compared. Done.
 
 ## Deviations from claude.md (with reasons)
 

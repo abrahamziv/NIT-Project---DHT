@@ -21,6 +21,7 @@ run_dir = save_run(
         "bank": f"identical {enc.describe()}",
         "x": "N",
     },
+    session=f"M{enc.M}",
 )
 
 fig, ax = plt.subplots()

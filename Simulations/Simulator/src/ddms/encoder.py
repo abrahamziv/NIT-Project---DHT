@@ -85,30 +85,34 @@ class LRTEncoder(ThresholdEncoder):
 
 
 class SilenceEncoder(ThresholdEncoder):
-    """Free-silence variant of the LRT: only strong readings send.
+    """Free-silence variant of the threshold policy: only strong readings send.
 
-    Thresholds t_lo < 1 < t_hi split l into three bins: below t_lo sends
-    "0" (strong H1 evidence), above t_hi sends "1" (strong H2 evidence),
-    the middle bin stays silent. Silence costs nothing to transmit; the
-    two active symbols still need only 1 bit, same as LRTEncoder. So the
-    nominal rate() (log2(3)) overstates what's actually sent -- use
-    mean_rate() for the real, model-dependent cost.
+    thresholds define the usual M = len(thresholds) + 1 bins; silent_indices
+    names which of those bins are free to "occupy" (no transmission cost).
+    The remaining active bins still need ceil(log2(#active)) bits whenever
+    used. So the nominal rate() (log2(M)) overstates what's actually sent --
+    use mean_rate() for the real, model-dependent cost.
+
+    Example: SilenceEncoder([0.5, 2.0], [1]) is the M=3 case (silence
+    between two thresholds, both active symbols need 1 bit).
     """
 
-    def __init__(self, t_lo=0.5, t_hi=2.0):
-        super().__init__([t_lo, t_hi])
-        self.silent_index = 1
+    def __init__(self, thresholds, silent_indices):
+        super().__init__(thresholds)
+        self.silent_indices = tuple(sorted(silent_indices))
+        n_active = self.M - len(self.silent_indices)
+        self._active_bits = float(np.log2(n_active))
 
     def mean_rate(self, model):
-        """Expected bits/sensor actually transmitted: 1 - P(silent | mixture)."""
+        """Expected bits/sensor actually transmitted."""
         q1 = self.cell_probs(model, 1)
         q2 = self.cell_probs(model, 2)
-        p_silent = model.p * q1[self.silent_index] + (1 - model.p) * q2[self.silent_index]
-        return 1.0 - p_silent
+        silent = list(self.silent_indices)
+        p_silent = model.p * q1[silent].sum() + (1 - model.p) * q2[silent].sum()
+        return self._active_bits * (1.0 - p_silent)
 
     def describe(self):
-        t_lo, t_hi = self.thresholds
-        return f"SilenceEncoder(t_lo={t_lo}, t_hi={t_hi})"
+        return f"SilenceEncoder(t={self.thresholds.tolist()}, silent={list(self.silent_indices)})"
 
 
 class EncoderBank:

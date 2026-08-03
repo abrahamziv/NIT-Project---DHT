@@ -73,7 +73,7 @@ def test_ragged_bank_padding_and_metadata():
 
 def test_silence_encoder_mean_rate_matches_direct_computation():
     model = GaussianShift.from_snr_db(0.0)
-    enc = SilenceEncoder(0.5, 2.0)
+    enc = SilenceEncoder([0.5, 2.0], [1])
     q1 = enc.cell_probs(model, 1)
     q2 = enc.cell_probs(model, 2)
     expected = 1.0 - (model.p * q1[1] + (1 - model.p) * q2[1])
@@ -82,9 +82,36 @@ def test_silence_encoder_mean_rate_matches_direct_computation():
 
 def test_silence_encoder_wider_silence_uses_less_rate():
     model = GaussianShift.from_snr_db(0.0)
-    narrow = SilenceEncoder(0.9, 1.1)
-    wide = SilenceEncoder(0.2, 5.0)
+    narrow = SilenceEncoder([0.9, 1.1], [1])
+    wide = SilenceEncoder([0.2, 5.0], [1])
     assert wide.mean_rate(model) < narrow.mean_rate(model)
+
+
+def test_silence_encoder_M4_mean_rate_matches_direct_computation():
+    model = GaussianShift.from_snr_db(0.0)
+    enc = SilenceEncoder([0.2, 1, 5], [1, 2])
+    q1 = enc.cell_probs(model, 1)
+    q2 = enc.cell_probs(model, 2)
+    p_silent = model.p * (q1[1] + q1[2]) + (1 - model.p) * (q2[1] + q2[2])
+    expected = 1.0 * (1.0 - p_silent)  # 2 active bins -> 1 bit when active
+    np.testing.assert_allclose(enc.mean_rate(model), expected, rtol=1e-12)
+
+
+def test_silence_encoder_M4_refines_M3_at_equal_rate():
+    # Same outer bounds (0.2, 5.0): M3 merges the middle into one silent bin,
+    # M4 keeps the two halves as separate (still free) symbols. Both have
+    # the same active-bit count and the same total silent mass, so mean
+    # rate matches -- but M4 gives the FC strictly more resolution for it.
+    model = GaussianShift.from_snr_db(0.0)
+    merged = SilenceEncoder([0.2, 5.0], [1])
+    split = SilenceEncoder([0.2, 1, 5], [1, 2])
+    np.testing.assert_allclose(split.mean_rate(model), merged.mean_rate(model), rtol=1e-12)
+
+    fc = FusionCenter()
+    N = 20
+    bank_merged = EncoderBank.identical(merged, N)
+    bank_split = EncoderBank.identical(split, N)
+    assert fc.total_exponent(bank_split, model) >= fc.total_exponent(bank_merged, model) - 1e-9
 
 
 def test_from_fractions_counts_sum_to_n():

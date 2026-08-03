@@ -29,15 +29,20 @@ Ns = np.unique(np.geomspace(10, N_MAX, 25).astype(int))
 
 model = GaussianShift.from_snr_db(snr_db)
 vanilla = LRTEncoder(1.0)
-silence = SilenceEncoder(t_lo=T_LO, t_hi=T_HI)
+silence = SilenceEncoder([T_LO, T_HI], [1])
 
 model_meta = {"type": "GaussianShift", "snr_db": snr_db, "mu": model.mu, "sigma": model.sigma, "p": model.p}
+
+group = f"vanilla_vs_silence_{snr_tag}"
+session = "M2"
 
 res_vanilla = sweep_over_N(model, lambda N: EncoderBank.identical(vanilla, N), Ns)
 vanilla_dir = save_run(
     res_vanilla,
     label=f"vanilla_exponent_vs_N_{snr_tag}",
     meta={"model": model_meta, "bank": f"identical {vanilla.describe()}", "x": "N"},
+    group=group,
+    session=session,
 )
 
 res_silence = sweep_over_N(model, lambda N: EncoderBank.identical(silence, N), Ns)
@@ -46,6 +51,8 @@ silence_dir = save_run(
     res_silence,
     label=f"silence_exponent_vs_N_{snr_tag}",
     meta={"model": model_meta, "bank": f"identical {silence.describe()}", "x": "N"},
+    group=group,
+    session=session,
 )
 
 stamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")

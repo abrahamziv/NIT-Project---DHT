@@ -1,0 +1,24 @@
+{
+  "combined_from": [
+    {
+      "snr_db": -5.0,
+      "vanilla4_run": "runs/M4/vanilla4_vs_silence4_snrm5_2026-08-03/2026-08-03_132052_vanilla4_exponent_vs_N_snrm5",
+      "silence4_run": "runs/M4/vanilla4_vs_silence4_snrm5_2026-08-03/2026-08-03_132113_silence4_exponent_vs_N_snrm5"
+    },
+    {
+      "snr_db": 0.0,
+      "vanilla4_run": "runs/M4/vanilla4_vs_silence4_snrp0_2026-08-03/2026-08-03_132134_vanilla4_exponent_vs_N_snrp0",
+      "silence4_run": "runs/M4/vanilla4_vs_silence4_snrp0_2026-08-03/2026-08-03_132154_silence4_exponent_vs_N_snrp0"
+    },
+    {
+      "snr_db": 5.0,
+      "vanilla4_run": "runs/M4/vanilla4_vs_silence4_snrp5_2026-08-03/2026-08-03_132215_vanilla4_exponent_vs_N_snrp5",
+      "silence4_run": "runs/M4/vanilla4_vs_silence4_snrp5_2026-08-03/2026-08-03_132234_silence4_exponent_vs_N_snrp5"
+    },
+    {
+      "snr_db": 10.0,
+      "vanilla4_run": "runs/M4/vanilla4_vs_silence4_snrp10_2026-08-03/2026-08-03_132257_vanilla4_exponent_vs_N_snrp10",
+      "silence4_run": "runs/M4/vanilla4_vs_silence4_snrp10_2026-08-03/2026-08-03_132318_silence4_exponent_vs_N_snrp10"
+    }
+  ]
+}
