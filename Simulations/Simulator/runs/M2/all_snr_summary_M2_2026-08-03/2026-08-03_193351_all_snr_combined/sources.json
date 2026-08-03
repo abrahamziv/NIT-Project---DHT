@@ -1,0 +1,24 @@
+{
+  "combined_from": [
+    {
+      "snr_db": -5.0,
+      "vanilla_run": "runs/M2/vanilla_vs_silence_snrm5_2026-08-03/2026-08-03_192348_vanilla_exponent_vs_N_snrm5",
+      "silence_run": "runs/M2/vanilla_vs_silence_snrm5_2026-08-02/2026-08-02_233225_silence_exponent_vs_N_snrm5"
+    },
+    {
+      "snr_db": 0.0,
+      "vanilla_run": "runs/M2/vanilla_vs_silence_snrp0_2026-08-03/2026-08-03_191538_vanilla_exponent_vs_N_snrp0",
+      "silence_run": "runs/M2/vanilla_vs_silence_snrp0_2026-08-02/2026-08-02_214423_silence_exponent_vs_N"
+    },
+    {
+      "snr_db": 5.0,
+      "vanilla_run": "runs/M2/vanilla_vs_silence_snrp5_2026-08-03/2026-08-03_192554_vanilla_exponent_vs_N_snrp5",
+      "silence_run": "runs/M2/vanilla_vs_silence_snrp5_2026-08-02/2026-08-02_233419_silence_exponent_vs_N_snrp5"
+    },
+    {
+      "snr_db": 10.0,
+      "vanilla_run": "runs/M2/vanilla_vs_silence_snrp10_2026-08-03/2026-08-03_192801_vanilla_exponent_vs_N_snrp10",
+      "silence_run": "runs/M2/vanilla_vs_silence_snrp10_2026-08-02/2026-08-02_233607_silence_exponent_vs_N_snrp10"
+    }
+  ]
+}

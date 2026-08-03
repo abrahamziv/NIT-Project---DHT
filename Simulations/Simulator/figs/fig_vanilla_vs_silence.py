@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from ddms import EncoderBank, GaussianShift, LRTEncoder, SilenceEncoder, save_run
-from ddms.sweep import sweep_over_N
+from ddms.sweep import sweep_over_N, sweep_over_R
 
 N_MAX = 3000
 T_LO, T_HI = 0.5, 2.0
@@ -55,11 +55,38 @@ silence_dir = save_run(
     session=session,
 )
 
+# Mandatory sweep over R: max affordable N per rate budget, matched across
+# schemes -- reuses the N grid above via each scheme's real per-sensor cost.
+silence_rate = silence.mean_rate(model)
+Rs = Ns * vanilla.rate()
+
+res_vanilla_r = sweep_over_R(
+    model, lambda N: EncoderBank.identical(vanilla, N), vanilla.rate(), Rs, N_max=N_MAX
+)
+vanilla_r_dir = save_run(
+    res_vanilla_r,
+    label=f"vanilla_exponent_vs_R_{snr_tag}",
+    meta={"model": model_meta, "bank": f"identical {vanilla.describe()}", "x": "rate_used"},
+    group=group,
+    session=session,
+)
+
+res_silence_r = sweep_over_R(
+    model, lambda N: EncoderBank.identical(silence, N), silence_rate, Rs, N_max=N_MAX
+)
+silence_r_dir = save_run(
+    res_silence_r,
+    label=f"silence_exponent_vs_R_{snr_tag}",
+    meta={"model": model_meta, "bank": f"identical {silence.describe()}", "x": "rate_used"},
+    group=group,
+    session=session,
+)
+
 stamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
 compare_dir = Path(vanilla_dir).parent / f"{stamp}_vanilla_vs_silence_compare_{snr_tag}"
 compare_dir.mkdir(parents=True)
 
-fig, (ax_rate, ax_exp) = plt.subplots(1, 2, figsize=(11, 4.5))
+fig, (ax_rate, ax_exp, ax_expR) = plt.subplots(1, 3, figsize=(16, 4.5))
 
 ax_rate.plot(Ns, res_vanilla["total_rate"], label="Vanilla, R = N")
 ax_rate.plot(Ns, res_silence["mean_rate_used"], label="Silence, mean rate used")
@@ -76,6 +103,13 @@ ax_exp.set_ylabel(r"$-\log J^N$")
 ax_exp.set_title("Error exponent")
 ax_exp.legend()
 
+ax_expR.plot(res_vanilla_r["rate_used"], res_vanilla_r["total_exponent"], label="Vanilla")
+ax_expR.plot(res_silence_r["rate_used"], res_silence_r["total_exponent"], label="Silence")
+ax_expR.set_xlabel("rate used (bits)")
+ax_expR.set_ylabel(r"$-\log J^N$")
+ax_expR.set_title("Error exponent vs. R (max N per budget)")
+ax_expR.legend()
+
 fig.suptitle(f"Vanilla vs. silence-is-free, SNR {snr_db:g} dB")
 fig.tight_layout()
 fig.savefig(compare_dir / "fig_vanilla_vs_silence.pdf")
@@ -88,8 +122,12 @@ params = {
     "silence_mean_rate_per_sensor": silence.mean_rate(model),
     "N_range": [int(Ns[0]), int(Ns[-1])],
     "N_points": len(Ns),
+    "R_range": [float(Rs[0]), float(Rs[-1])],
+    "silence_N_of_R_range": [int(res_silence_r["N"][0]), int(res_silence_r["N"][-1])],
 }
 print(f"parameters: {params}")
 print(f"saved {vanilla_dir}")
 print(f"saved {silence_dir}")
+print(f"saved {vanilla_r_dir}")
+print(f"saved {silence_r_dir}")
 print(f"saved {compare_dir}")

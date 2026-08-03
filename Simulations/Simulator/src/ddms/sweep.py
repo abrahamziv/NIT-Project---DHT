@@ -47,6 +47,29 @@ def sweep_over_snr(snr_dbs, make_model, make_bank, N, fc=None):
     return _collect(rows, {"snr_db": np.asarray(list(snr_dbs))})
 
 
+def sweep_over_R(model, make_bank, per_sensor_rate, Rs, fc=None, N_max=None):
+    """make_bank(N) -> EncoderBank, as in sweep_over_N.
+
+    Sweeps a grid of total-rate budgets R. At each R, uses the maximum
+    affordable N = floor(R / per_sensor_rate) sensors, so schemes are
+    compared at matched rate rather than matched N. per_sensor_rate is the
+    scheme's real per-sensor cost: rate() for fixed-length encoders,
+    mean_rate(model) for anything with a free/zero-cost symbol.
+
+    N_max, if given, caps N independent of the budget -- a lower-rate scheme
+    can otherwise demand far more sensors than a fusion path capped for
+    compute reasons (see each fig script's own N_max) can afford to evaluate.
+    N and rate_used both reflect the capped N, so they stay self-consistent.
+    """
+    fc = FusionCenter(p=model.p) if fc is None else fc
+    Ns = np.array([max(1, int(R // per_sensor_rate)) for R in Rs])
+    if N_max is not None:
+        Ns = np.minimum(Ns, N_max)
+    rows = [_evaluate(fc, make_bank(int(N)), model) for N in Ns]
+    extra = {"R": np.asarray(list(Rs)), "N": Ns, "rate_used": Ns * per_sensor_rate}
+    return _collect(rows, extra)
+
+
 def sweep_over_rate(model, make_bank, rates, fc=None):
     """make_bank(rate) -> EncoderBank. Sweeps total rate at a fixed scheme."""
     fc = FusionCenter(p=model.p) if fc is None else fc
