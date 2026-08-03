@@ -84,6 +84,33 @@ class LRTEncoder(ThresholdEncoder):
         super().__init__([t])
 
 
+class SilenceEncoder(ThresholdEncoder):
+    """Free-silence variant of the LRT: only strong readings send.
+
+    Thresholds t_lo < 1 < t_hi split l into three bins: below t_lo sends
+    "0" (strong H1 evidence), above t_hi sends "1" (strong H2 evidence),
+    the middle bin stays silent. Silence costs nothing to transmit; the
+    two active symbols still need only 1 bit, same as LRTEncoder. So the
+    nominal rate() (log2(3)) overstates what's actually sent -- use
+    mean_rate() for the real, model-dependent cost.
+    """
+
+    def __init__(self, t_lo=0.5, t_hi=2.0):
+        super().__init__([t_lo, t_hi])
+        self.silent_index = 1
+
+    def mean_rate(self, model):
+        """Expected bits/sensor actually transmitted: 1 - P(silent | mixture)."""
+        q1 = self.cell_probs(model, 1)
+        q2 = self.cell_probs(model, 2)
+        p_silent = model.p * q1[self.silent_index] + (1 - model.p) * q2[self.silent_index]
+        return 1.0 - p_silent
+
+    def describe(self):
+        t_lo, t_hi = self.thresholds
+        return f"SilenceEncoder(t_lo={t_lo}, t_hi={t_hi})"
+
+
 class EncoderBank:
     """The profile gamma^{1:N}: a list of encoders, possibly with different M."""
 

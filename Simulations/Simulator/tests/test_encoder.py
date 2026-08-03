@@ -1,6 +1,13 @@
 import numpy as np
 
-from ddms import EncoderBank, FusionCenter, GaussianShift, LRTEncoder, ThresholdEncoder
+from ddms import (
+    EncoderBank,
+    FusionCenter,
+    GaussianShift,
+    LRTEncoder,
+    SilenceEncoder,
+    ThresholdEncoder,
+)
 
 
 def test_cell_probs_are_a_pmf():
@@ -62,6 +69,22 @@ def test_ragged_bank_padding_and_metadata():
         P = bank.cell_probs_matrix(model, j)
         assert P.shape == (2, 4)
         np.testing.assert_array_equal(P[0, 2:], 0.0)
+
+
+def test_silence_encoder_mean_rate_matches_direct_computation():
+    model = GaussianShift.from_snr_db(0.0)
+    enc = SilenceEncoder(0.5, 2.0)
+    q1 = enc.cell_probs(model, 1)
+    q2 = enc.cell_probs(model, 2)
+    expected = 1.0 - (model.p * q1[1] + (1 - model.p) * q2[1])
+    np.testing.assert_allclose(enc.mean_rate(model), expected, rtol=1e-12)
+
+
+def test_silence_encoder_wider_silence_uses_less_rate():
+    model = GaussianShift.from_snr_db(0.0)
+    narrow = SilenceEncoder(0.9, 1.1)
+    wide = SilenceEncoder(0.2, 5.0)
+    assert wide.mean_rate(model) < narrow.mean_rate(model)
 
 
 def test_from_fractions_counts_sum_to_n():

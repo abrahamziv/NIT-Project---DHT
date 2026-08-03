@@ -1,4 +1,11 @@
-from .encoder import Encoder, EncoderBank, LRTEncoder, ThresholdEncoder, VanillaEncoder
+from .encoder import (
+    Encoder,
+    EncoderBank,
+    LRTEncoder,
+    SilenceEncoder,
+    ThresholdEncoder,
+    VanillaEncoder,
+)
 from .fusion import FusionCenter
 from .model import DiscreteLR, GaussianShift, StatisticalModel
 from .runs import load_run, save_run
@@ -10,6 +17,7 @@ __all__ = [
     "FusionCenter",
     "GaussianShift",
     "LRTEncoder",
+    "SilenceEncoder",
     "StatisticalModel",
     "ThresholdEncoder",
     "VanillaEncoder",
