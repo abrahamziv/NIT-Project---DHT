@@ -246,6 +246,11 @@ On the other hand, if $P(u^i|H_1) = P(u^i|H_2)$ for all $u \in \mathcal{U}$, the
 For any other conditional probabilities, the Chernoff distance provides a solid bound on the error exponent.\newline
 This result is highly intuitive: as the quantized observations under each hypothesis become more distinguishable, the Chernoff distance grows. This yields a larger error exponent, which drives a steeper exponential decay in the probability of error. In practical terms, greater distinguishability at the sensor level guarantees an exponentially better detection performance as the number of sensors grows.
 
+\section{Considering rate}
+\subsection*{Assumptions}
+\begin{itemize}
+    \item $|U| = 2$ 
+\end{itemize}
 \newpage
 \section{Appendix}
 \subsection{Full Derivation of the Error Exponent}

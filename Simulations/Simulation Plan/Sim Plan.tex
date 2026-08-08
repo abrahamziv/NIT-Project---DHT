@@ -54,11 +54,11 @@
 \node[box, minimum width=2.6cm] (G0) at (16.0,0) {$\gamma^0$, MAP};
 
 % Statistical model enclosure
-\node[draw, dashed, thick, inner sep=0.3cm, fit=(H)(S1)(SN),
+\node[draw, dashed, thick, inner sep=0.3cm, fit=(H)(S1)(SN)(L1)(LN),
       label={[font=\small]above:Statistical Model}] (SMbox) {};
 
 % Encoder enclosure
-\node[draw, dashed, thick, inner sep=0.3cm, fit=(L1)(E1)(LN)(EN),
+\node[draw, dashed, thick, inner sep=0.3cm, fit=(E1)(EN),
       label={[font=\small]above:Encoder}] (ENCbox) {};
 
 % Fusion center enclosure
@@ -98,5 +98,22 @@
 \caption{Block diagram of the decentralized detection system. The source $H^\star$ generates the hypothesis observed by $N$ sensors as $y^i \mid H_j$. Each sensor reduces its observation to the likelihood ratio $l^i = L(y^i)$, which is a sufficient statistic for $H$, and quantizes it via the threshold policy $\gamma^i$ into a message $u^i$. The fusion center forms the statistic $\Delta_N$ from all messages together with the realized encoding policies $\gamma^{1:N}$ (dashed), and applies the MAP rule $\gamma^0$ to produce the decision $\hat{H}$.}
 \label{fig:system-model}
 \end{figure}
+
+\newpage
+\section*{Simulation of Silence is free (SIF) VS Vanilla setups with $|\mathcal{U}| =4$}
+We would like to compare the Error exponents achieved for different setups under the same total rate budget. For that we should define the \textbf{Expected Rate per Sensor}:
+\begin{align}
+    r(\gamma) \triangleq \mathbb{E}[bits sent] = \sum_{u \in \mathcal{U}}P^{\gamma}(u)\rho(u)
+\end{align}
+\begin{align}
+    P^\gamma(u) = pP^\gamma(u|H_1) + (1-p)P^\gamma(u|H_2)
+\end{align}
+The two schemes will result in the following $r(\gamma)$:
+\begin{itemize}
+    \item \textbf{Vanilla}: Every sensor always sends its action, so the average bits used is $\log_2(|\mathcal{U}|)$
+    \item \textbf{SIF}: Sends the action only if $u \notin \mathcal{S}$, when $\mathcal{S}$ is the group of silent actions. In this case, every symbol costs $\log_2(|\mathcal{U}|)$ but is sent w.p $\delta = P(u \notin \mathcal{S})$, so $r_{SIF} = \delta \log_2(|\mathcal{U}|)$.
+\end{itemize}
+
+
 
 \end{document}
