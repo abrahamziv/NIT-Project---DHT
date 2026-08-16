@@ -35,3 +35,27 @@ def test_two_runs_get_distinct_directories(tmp_path):
     assert d1 != d2
     assert load_run(d1)["data"]["x"] == [1]
     assert load_run(d2)["data"]["x"] == [2]
+
+
+def test_group_defaults_to_label(tmp_path):
+    run_dir = save_run({"x": [1]}, label="solo_run", root=tmp_path)
+    date = run_dir.name[:10]
+    assert run_dir.parent.name == f"solo_run_{date}"
+
+
+def test_explicit_group_nests_siblings_together(tmp_path):
+    d1 = save_run({"x": [1]}, label="vanilla", group="compare_snrm5", root=tmp_path)
+    d2 = save_run({"x": [2]}, label="silence", group="compare_snrm5", root=tmp_path)
+    assert d1.parent == d2.parent
+    date = d1.name[:10]
+    assert d1.parent.name == f"compare_snrm5_{date}"
+
+
+def test_session_nests_under_a_top_level_bucket(tmp_path):
+    run_dir = save_run({"x": [1]}, label="vanilla4", group="cmp", session="M4", root=tmp_path)
+    assert run_dir.parent.parent == tmp_path / "M4"
+
+
+def test_no_session_stays_directly_under_root(tmp_path):
+    run_dir = save_run({"x": [1]}, label="solo", root=tmp_path)
+    assert run_dir.parent.parent == tmp_path

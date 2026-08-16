@@ -203,7 +203,7 @@ Since $J^N \sim e^{-\beta N}$, this is unusable in the regime of interest — at
 | `chernoff_bound(bank, model)` | $-\min_{\alpha}\sum_i \log M(\alpha, \gamma^i)$ | DDMS eq. 24 |
 | `empirical_error_prob(bank, model, T, rng)` | $\hat J^N$ | validation only |
 
-Report $-\log J^N$ rather than $J^N_{EE}$ when comparing schemes: dividing by $N$ hides gains that come from changing how many sensors speak, which is exactly what a rate-reallocation scheme does.
+Prefer $-\log J^N$ over $J^N_{EE}$ as the single reported number when comparing schemes: dividing by $N$ hides gains that come from changing how many sensors speak, which is exactly what a rate-reallocation scheme does. Default figures plot both anyway (see `### Default figures and run summaries`) — it's cheap, and it makes visible exactly the kind of gap normalizing would hide.
 
 ### Tests
 
@@ -229,9 +229,13 @@ src/ddms/model.py       # Statistical Model
 src/ddms/encoder.py     # Encoder, EncoderBank
 src/ddms/fusion.py      # Fusion Center
 src/ddms/sweep.py       # parameter sweeps, returns arrays
-src/ddms/runs.py        # save_run / load_run: timestamped run directories
+src/ddms/runs.py        # save_run / load_run: grouped, timestamped run directories
 figs/                   # one script per figure
-runs/                   # one directory per sweep run: data.json + figures, committed
+runs/<session>/<group>_<date>/  # <session> buckets by encoder family (e.g. M2, M4)
+                                 # so unrelated families never interleave alphabetically;
+                                 # <group>_<date> is one directory per simulation
+                                 # (parameters + date, no hour); inside, one directory
+                                 # per sweep run: data.json + figures, committed
 tests/
 docs/PLAN.md
 ```
@@ -255,24 +259,67 @@ One module per class, matching the sections of this document.
 - Two tolerance classes: exact-path comparisons at `rtol=1e-12`, Monte-Carlo comparisons at a fixed seed with an explicit tolerance.
 - Example 1 of the paper is the regression anchor.
 ### Sweeps and figures
- 
+
 The three classes are a pure computation pipeline and never touch the filesystem or matplotlib. Two layers sit above them:
  
-- **`sweep.py`** — plain functions (`sweep_over_N`, `sweep_over_rate`, `sweep_over_snr`) returning arrays. This is where the nontrivial logic lives: building the right bank at each point, matching total rate across schemes. Tested. Never touches the filesystem.
-- **`runs.py`** — `save_run(results, label, meta)` writes a sweep's raw arrays plus metadata to `runs/<timestamp>_<label>/data.json` and returns the run directory; figure scripts save their PDFs into that same directory. `load_run(dir)` restores the arrays. Every reported figure therefore sits next to the exact JSON that produced it, so runs made on different branches (different encoders) can be pulled together and overlaid later — `figs/fig_compare_runs.py` does exactly that. `runs/` is committed, not gitignored.
-- **`figs/fig_*.py`** — one script per figure, roughly 30 lines each: call a sweep, `save_run`, plot, save a vector PDF into the run directory for direct LaTeX inclusion. Run with `python figs/fig_name.py`. Default matplotlib styling. Disposable; anything ad hoc (annotations, insets, closed-form overlays) lives here and never leaks into code that produces reported numbers.
+- **`sweep.py`** — plain functions (`sweep_over_N`, `sweep_over_R`, `sweep_over_rate`, `sweep_over_snr`) returning arrays. This is where the nontrivial logic lives: building the right bank at each point, matching total rate across schemes. Tested. Never touches the filesystem.
+- **`runs.py`** — `save_run(results, label, meta, group=None, session=None)` writes a sweep's raw arrays plus metadata to `runs/<session>/<group>_<date>/<timestamp>_<label>/data.json` and returns the run directory; figure scripts save their PDFs into that same directory. `group` names the simulation's parameters (e.g. `vanilla4_vs_silence4_snrp5`) so a comparison's paired runs and its compare figure land together; it defaults to `label` when a run doesn't share a group with anything else. `date` is day-only (no hour), so everything from one simulation on one day sits under a single parent folder. `session` is a top-level bucket for the encoder family a run belongs to (e.g. `"M2"`, `"M4"`) — pass `f"M{encoder.M}"` (or the family's fixed name) explicitly from the figure script; **always pass `session` for any new encoder family**, so `runs/` never interleaves unrelated families alphabetically the way a flat `all_snr_summary_M2` / `all_snr_summary_M4` pair once did. Omit `session` only for one-off runs with no family (rare). `load_run(dir)` restores the arrays. Every reported figure therefore sits next to the exact JSON that produced it, so runs made on different branches (different encoders) can be pulled together and overlaid later — `figs/fig_compare_runs.py` does exactly that. `runs/` is committed, not gitignored.
+- **`figs/fig_*.py`** — one script per figure or comparison: call a sweep (or several, for a multi-scheme comparison), `save_run` each, plot, save a vector PDF into the run directory for direct LaTeX inclusion. Roughly 30 lines for a single-sweep figure, more for a multi-scheme/multi-SNR comparison. Run with `python figs/fig_name.py`. Default matplotlib styling. Disposable; anything ad hoc (annotations, insets, closed-form overlays) lives here and never leaks into code that produces reported numbers.
 No caching until a sweep is measurably slow.
- 
+
+### Default figures and run summaries
+
+- **Default figures.** Unless a request calls for something else (a
+  chernoff_bound overlay, etc.), every comparison reports two mandatory
+  sweeps:
+  - **Sweep over N (mandatory).** Three panels vs `N`: **Rate**
+    (`total_rate()` for plain fixed-length encoders; a scheme-specific
+    `mean_rate()`-style method plus a dashed nominal-rate reference line
+    for anything with a free/zero-cost symbol), **total exponent**
+    `-log J^N` (the headline metric from `### Outputs` above), and
+    **normalized exponent** `J^N_EE = -(1/N) log J^N` ("EE"). Both
+    exponent forms are already computed by every sweep, so plotting both
+    costs nothing and makes visible exactly what per-sensor normalization
+    would otherwise hide (e.g. a scheme that only wins because it uses
+    fewer sensors).
+  - **Sweep over R (mandatory).** For a grid of total-rate budgets `R`,
+    use the maximum number of sensors that budget affords —
+    `N(R) = floor(R / r)`, where `r` is each scheme's real per-sensor
+    cost (`rate()` for fixed-length encoders, `mean_rate(model)` for
+    anything with a free/zero-cost symbol) — and report `N(R)` (in the
+    run's data/README, not necessarily plotted) alongside one panel: the
+    non-normalized total exponent `-log J^N` plotted against the rate
+    actually used (`N(R) * r`, not the nominal budget `R`). This is the
+    sweep that makes "matched `total_rate()`, not matched `N`" (see
+    `EncoderBank` above) an actual comparison rather than a stated
+    principle: at equal budget, a scheme with lower real per-sensor cost
+    affords more sensors, and that is exactly what should show up here.
+  When several schemes or SNRs share one plot, colour encodes the swept
+  parameter and line style encodes the scheme, in one legend (see
+  `figs/fig_all_snr_summary.py`'s overlay panel).
+- **Run summary.** Every output directory a figure script writes --
+  whether it holds its own `data.json` (a `save_run` call) or is a
+  derived comparison with none -- gets a short `README.md` next to the
+  PDF: model type and parameters (SNR/mu/sigma, prior `p`), each
+  encoder's `describe()` and alphabet size `|U|`, the swept `N` range,
+  and any limitations or extra parameters introduced (an `N` cap and
+  why, custom thresholds, which run directories a comparison was built
+  from). A handful of bullet points, not prose -- e.g.:
+
+  ```markdown example
+  # silence_exponent_vs_N_snrp5
+
+  - Model: GaussianShift, SNR = 5 dB (mu=1.778, sigma=1.0), p=0.5
+  - Encoder: SilenceEncoder(t_lo=0.5, t_hi=2.0), |U|=3 (2 active + 1 free
+    silent symbol)
+  - N: 25 points, geomspace(10, 3000)
+  - Notes: N capped at 3000 -- exact J^N is O(N^2) for this 3-symbol
+    alphabet; mean rate used = 0.79 bits/sensor at this SNR.
+  ```
 ### Guards
  
 - `N_max` on the heterogeneous convolution path, raising an explicit error rather than silently falling back.
 - `uniform_alphabet()` recorded in every run's metadata, so results are always labelled as inside or outside Assumption 1(iii).
-### Coding standards
- 
-1. Keep it simple. No over-engineering, no unnecessary defensive programming, no extra features.
-2. Be concise. Minimal README. No emojis.
-3. When hitting issues, identify the root cause before fixing. Prove with evidence, then fix the cause.
-
 ## Coding standards
 
 1. Use latest versions of libraries and idiomatic approaches as of today

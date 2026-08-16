@@ -84,6 +84,37 @@ class LRTEncoder(ThresholdEncoder):
         super().__init__([t])
 
 
+class SilenceEncoder(ThresholdEncoder):
+    """Free-silence variant of the threshold policy: only strong readings send.
+
+    thresholds define the usual M = len(thresholds) + 1 bins; silent_indices
+    names which of those bins are free to "occupy" (no transmission cost).
+    The remaining active bins still need ceil(log2(#active)) bits whenever
+    used. So the nominal rate() (log2(M)) overstates what's actually sent --
+    use mean_rate() for the real, model-dependent cost.
+
+    Example: SilenceEncoder([0.5, 2.0], [1]) is the M=3 case (silence
+    between two thresholds, both active symbols need 1 bit).
+    """
+
+    def __init__(self, thresholds, silent_indices):
+        super().__init__(thresholds)
+        self.silent_indices = tuple(sorted(silent_indices))
+        n_active = self.M - len(self.silent_indices)
+        self._active_bits = float(np.log2(n_active))
+
+    def mean_rate(self, model):
+        """Expected bits/sensor actually transmitted."""
+        q1 = self.cell_probs(model, 1)
+        q2 = self.cell_probs(model, 2)
+        silent = list(self.silent_indices)
+        p_silent = model.p * q1[silent].sum() + (1 - model.p) * q2[silent].sum()
+        return self._active_bits * (1.0 - p_silent)
+
+    def describe(self):
+        return f"SilenceEncoder(t={self.thresholds.tolist()}, silent={list(self.silent_indices)})"
+
+
 class EncoderBank:
     """The profile gamma^{1:N}: a list of encoders, possibly with different M."""
 
