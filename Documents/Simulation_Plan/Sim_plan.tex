@@ -7,6 +7,8 @@
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
 \usetikzlibrary{arrows.meta, positioning, calc,fit}
 
 \title{Simulation Plan}
@@ -100,20 +102,137 @@
 \end{figure}
 
 \newpage
-\section*{Simulation of Silence is free (SIF) VS Vanilla setups with $|\mathcal{U}| =4$}
-We would like to compare the Error exponents achieved for different setups under the same total rate budget. For that we should define the \textbf{Expected Rate per Sensor}:
-\begin{align}
-    r(\gamma) \triangleq \mathbb{E}[bits sent] = \sum_{u \in \mathcal{U}}P^{\gamma}(u)\rho(u)
-\end{align}
-\begin{align}
-    P^\gamma(u) = pP^\gamma(u|H_1) + (1-p)P^\gamma(u|H_2)
-\end{align}
-The two schemes will result in the following $r(\gamma)$:
-\begin{itemize}
-    \item \textbf{Vanilla}: Every sensor always sends its action, so the average bits used is $\log_2(|\mathcal{U}|)$
-    \item \textbf{SIF}: Sends the action only if $u \notin \mathcal{S}$, when $\mathcal{S}$ is the group of silent actions. In this case, every symbol costs $\log_2(|\mathcal{U}|)$ but is sent w.p $\delta = P(u \notin \mathcal{S})$, so $r_{SIF} = \delta \log_2(|\mathcal{U}|)$.
-\end{itemize}
+\section{Simulation 1 - One bit per sensor}
+In this simulation, each sensor can transmit up to 1 bit, encoding its local decision as $u^1$ or $u^2$. We evaluate the Normalized Error Exponent $J^N_{EE} = -\frac{1}{N}\log(J^N)$ as a function of $N$, the number of sensors observing the environment. The statistical model is Gaussian, with the mean varying across hypotheses, and all sensors are assumed to share the same policy.
+\subsection*{Setup A - Always Transmit Policy (Vanilla)}
+Each sensor observes $y \sim \mathcal{N}(0,\sigma^2)$ under $H_1$ or $y \sim \mathcal{N}(\mu,\sigma^2)$ under $H_2$, and always transmits one bit indicating which side of a fixed threshold its observation falls on. The threshold is set at $\tau = \frac{\mu}{2}$, the midpoint between the two hypothesis means.
 
+\begin{figure}[h!]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            width=0.7\textwidth,
+            height=5cm,
+            axis lines = middle,
+            xlabel = {$y$},
+            xtick = {0, 1.5, 3},
+            xticklabels = {$0$, $\frac{\mu}{2}$, $\mu$},
+            ytick = \empty,
+            samples = 100,
+            domain = -4:7,
+            legend pos = outer north east,
+        ]
+        \addplot[thick, blue, smooth] {1/sqrt(2*pi)*exp(-x^2/2)};
+        \addlegendentry{$f_{y|H_1}$}
+        \addplot[thick, red, smooth] {1/sqrt(2*pi)*exp(-(x-3)^2/2)};
+        \addlegendentry{$f_{y|H_2}$}
+        \addplot[thick, dashed, black] coordinates {(1.5,0) (1.5,0.42)};
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Gaussian model for Setup A. A sensor decides $u^1$ if $y < \mu/2$ and $u^2$ if $y \geq \mu/2$, and always transmits its 1-bit decision.}
+\end{figure}
 
+\subsection*{Setup B - Silent Policy}
+Each sensor observes the same Gaussian model as in Setup A, but now transmits its decision only when confident about it: it sends $u^1$ if $y < \lambda_1$, $u^2$ if $y \geq \lambda_2$, and stays silent otherwise. The two thresholds $\lambda_1 < \lambda_2$ are placed symmetrically around the midpoint $\mu/2$, so a sensor only transmits when its observation falls far enough from the boundary between the hypotheses.
+
+\begin{figure}[h!]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            width=0.7\textwidth,
+            height=5cm,
+            axis lines = middle,
+            xlabel = {$y$},
+            xtick = {0, 1, 2, 3},
+            xticklabels = {$0$, $\lambda_1$, $\lambda_2$, $\mu$},
+            ytick = \empty,
+            samples = 100,
+            domain = -4:7,
+            legend pos = outer north east,
+        ]
+        \addplot[fill=gray!20, draw=none, forget plot] coordinates {(1,0) (1,0.42) (2,0.42) (2,0)} \closedcycle;
+        \addplot[thick, blue, smooth] {1/sqrt(2*pi)*exp(-x^2/2)};
+        \addlegendentry{$f_{y|H_1}$}
+        \addplot[thick, red, smooth] {1/sqrt(2*pi)*exp(-(x-3)^2/2)};
+        \addlegendentry{$f_{y|H_2}$}
+        \addplot[thick, dashed, black, forget plot] coordinates {(1,0) (1,0.42)};
+        \addplot[thick, dashed, black, forget plot] coordinates {(2,0) (2,0.42)};
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Gaussian model for Setup B. A sensor sends $u^1$ if $y < \lambda_1$, $u^2$ if $y \geq \lambda_2$, and stays silent (shaded region) otherwise.}
+\end{figure}
+\newpage
+\section{Simulation 2 - $R$ bits per sensor}
+In this simulation, each sensor can transmit up to $R = \log_2(L)$ bits, encoding its local decision into $\mathcal{U} = \{u^1, u^2, \dots u^L\}$.
+We will fix the number of sensors $N = $ and evaluate the Normalized Error Exponent $J^N_{EE} = -\frac{1}{N}\log(J^N)$ as a function of $R$, the number of bits allocated per sensor.
+We will note how many sensors were transmitting at each simulation.
+The statistical model is Gaussian, with the mean varying across hypotheses, and all sensors are assumed to share the same symmetric and evenly distributed policy.
+
+\subsection*{Setup A - Always Transmit Policy (Vanilla)}
+Each sensor observes $y \sim \mathcal{N}(0,\sigma^2)$ under $H_1$ or $y \sim \mathcal{N}(\mu,\sigma^2)$ under $H_2$, and always transmits $R$ bits indicating which hypothesis it observed and how strong was the observation.
+
+\begin{figure}[h!]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            width=\textwidth,
+            height=5cm,
+            axis lines = middle,
+            xlabel = {$y$},
+            xtick = {-1, 0, 0.5, 1.5, 2.4, 3, 4},
+            xticklabels = {$t_1$, $0$, $t_2$, $t_3$, $\cdots$, $\mu$, $t_{L-1}$},
+            x tick label style={font=\footnotesize},
+            ytick = \empty,
+            samples = 100,
+            domain = -3:6,
+            legend pos = outer north east,
+        ]
+        \addplot[thick, blue, smooth] {1/sqrt(2*pi)*exp(-x^2/2)};
+        \addlegendentry{$f_{y|H_1}$}
+        \addplot[thick, red, smooth] {1/sqrt(2*pi)*exp(-(x-3)^2/2)};
+        \addlegendentry{$f_{y|H_2}$}
+        \addplot[thick, dashed, black, forget plot] coordinates {(-1,0) (-1,0.42)};
+        \addplot[thick, dashed, black, forget plot] coordinates {(0.5,0) (0.5,0.42)};
+        \addplot[thick, dashed, black, forget plot] coordinates {(1.5,0) (1.5,0.42)};
+        \addplot[thick, dashed, black, forget plot] coordinates {(4,0) (4,0.42)};
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Gaussian model for Setup A under Simulation 2. The observation space is partitioned by $L-1$ thresholds $t_1 < t_2 < \dots < t_{L-1}$ into $L$ regions, each mapped to a distinct symbol $u^i \in \mathcal{U}$; the thresholds extend beyond both means, and the sensor always transmits the $R = \log_2(L)$ bits identifying its region.}
+\end{figure}
+\newpage
+\subsection*{Setup B - Silent policy}
+Each sensor observes the same Gaussian model as in Setup A, but now stays silent when its observation is inconclusive. The observation space is split using $L$ thresholds (one more than in Setup A) into $L+1$ regions: $L/2$ bins on each side of a central \emph{silence bin}. The silence bin is symmetric about the midpoint $\mu/2$ with half-width $\delta$, bounded by $\mu/2-\delta$ and $\mu/2+\delta$. A sensor stays silent if its observation falls inside the silence bin, and otherwise always transmits the $R=\log_2(L)$ bits identifying which of the remaining $L$ regions its observation fell into.
+
+\begin{figure}[h!]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            width=\textwidth,
+            height=5cm,
+            axis lines = middle,
+            xlabel = {$y$},
+            xtick = {-1.2, 0, 0.4, 0.75, 1.1, 1.9, 2.25, 2.6, 3, 4.2},
+            xticklabels = {$t_1$, $0$, $t_2$, $\cdots$, $\frac{\mu}{2}\!-\!\delta$, $\frac{\mu}{2}\!+\!\delta$, $\cdots$, $t_{L-1}$, $\mu$, $t_L$},
+            x tick label style={font=\footnotesize},
+            ytick = \empty,
+            samples = 100,
+            domain = -3:6,
+            legend pos = outer north east,
+        ]
+        \addplot[fill=gray!20, draw=none, forget plot] coordinates {(1.1,0) (1.1,0.42) (1.9,0.42) (1.9,0)} \closedcycle;
+        \addplot[thick, blue, smooth] {1/sqrt(2*pi)*exp(-x^2/2)};
+        \addlegendentry{$f_{y|H_1}$}
+        \addplot[thick, red, smooth] {1/sqrt(2*pi)*exp(-(x-3)^2/2)};
+        \addlegendentry{$f_{y|H_2}$}
+        \addplot[thick, dashed, black, forget plot] coordinates {(-1.2,0) (-1.2,0.42)};
+        \addplot[thick, dashed, black, forget plot] coordinates {(0.4,0) (0.4,0.42)};
+        \addplot[thick, dashed, black, forget plot] coordinates {(1.1,0) (1.1,0.42)};
+        \addplot[thick, dashed, black, forget plot] coordinates {(1.9,0) (1.9,0.42)};
+        \addplot[thick, dashed, black, forget plot] coordinates {(2.6,0) (2.6,0.42)};
+        \addplot[thick, dashed, black, forget plot] coordinates {(4.2,0) (4.2,0.42)};
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Gaussian model for Setup B under Simulation 2. The observation space is partitioned by $L$ thresholds into $L/2$ bins on each side of the shaded silence bin, which is centered on $\mu/2$ with half-width $\delta$; a sensor stays silent if its observation falls in the shaded region, and otherwise transmits the $R=\log_2(L)$ bits identifying its region.}
+\end{figure}
 
 \end{document}
