@@ -219,6 +219,7 @@ Lemma 3 is an important step towards establishing the \textbf{existence} of an o
 \subsubsection*{Theorem 1}
 There exists an optimal decision rule sequence $\gamma^{0:N\star} = (\gamma^{0\star},\gamma^{1\star},\dots, \gamma^{N\star})$. These policies are MAP for the FC and threshold for the sensors.\\
 The proof of Theorem 1 follows from Lemmas 1 and 2, together with the compactness of $\Gamma^N_{TS}$ (Lemma 3). Since $J^N(\gamma^{0:N})$ is continuous in the sensors' policies over this compact set, Weierstrass's extreme value theorem guarantees that the infimum is attained.
+
 \section{Calculating the error exponent}
 \label{sec:error-exponent}
 Under assumptions (i) - (v) and Theorem 1, we can formulate a closed-form bound for the error exponent. 
@@ -248,7 +249,9 @@ On the other hand, if $P(u^i|H_1) = P(u^i|H_2)$ for all $u \in \mathcal{U}$, the
 For any other conditional probabilities, the Chernoff distance provides a solid bound on the error exponent.\newline
 This result is highly intuitive: as the quantized observations under each hypothesis become more distinguishable, the Chernoff distance grows. This yields a larger error exponent, which drives a steeper exponential decay in the probability of error. In practical terms, greater distinguishability at the sensor level guarantees an exponentially better detection performance as the number of sensors grows.
 \newpage
+
 \section{Considering rate}
+\label{sec:considering-rate}
 We now turn to the total rate consumed by the sensors. We consider two encoding and transmission policies. The first is the \textbf{vanilla} policy, under which every sensor transmits its local decision regardless of how confident it is in that decision. The second is a \textbf{silent} policy, in which we introduce two thresholds on each sensor's decision rule: a sensor transmits its action only if its observation falls in the leftmost or rightmost bin, i.e., only when it is highly confident in its local decision.
 \subsection*{Assumptions}
 \begin{itemize}
@@ -278,21 +281,7 @@ We now turn to the total rate consumed by the sensors. We consider two encoding 
 \end{itemize}
 For each setup, we derive the corresponding Chernoff distance bound of Equation~\eqref{eq:chernoff-distance} and evaluate the setups' performance via simulation.
 \subsection*{Setup A - Vanilla}
-We first derive the decision threshold for the vanilla setup. By Lemma 1, the optimal decision rule is a threshold $\tau$ on the likelihood ratio: the sensor transmits $u^2$ if
-\begin{align*}
-    L(y) = \frac{f_{y|H_2}(y|H_2)}{f_{y|H_1}(y|H_1)} \geq \tau
-\end{align*}
-and $u^1$ otherwise. Under the Gaussian assumption, $L(y)$ simplifies to
-\begin{align*}
-    L(y) = \frac{f_{y|H_2}(y|H_2)}{f_{y|H_1}(y|H_1)} = \exp\bigg(\frac{-(y-\mu)^2 + y^2}{2\sigma^2}\bigg) = \exp\bigg(\frac{2y\mu-\mu^2}{2\sigma^2}\bigg)
-\end{align*}
-Taking $\log$ gives the log-likelihood ratio
-\begin{align*}
-    \log(L(y)) = \frac{y\mu}{\sigma^2} - \frac{\mu^2}{2\sigma^2} &\geq \log(\tau) \\
-    \frac{y\mu}{\sigma^2} &\geq \log(\tau) + \frac{\mu^2}{2\sigma^2}\\
-    y &\geq \frac{\sigma^2}{\mu}\log(\tau) + \frac{\mu}{2} \triangleq \lambda_V
-\end{align*}
-Since the optimal rule corresponds to $\tau = 1$, this reduces to a threshold on $y$ at $\lambda_V = \frac{\mu}{2}$, and we define:
+By Lemma 1, the optimal decision rule is a threshold on the likelihood ratio $L(y)$. Under the Gaussian model and the MAP-optimal choice $\tau=1$, this reduces to a threshold directly on $y$ at $\lambda_V = \frac{\mu}{2}$ (full derivation in Appendix~\ref{app:vanilla-derivation}), giving the regions:
 \begin{itemize}
     \item $P^{\gamma^V}(u^1|H_j) = \int_{R_1}f_{y|H_j}(y|H_j)dy$, $R_1 = \{y \in \mathcal{Y}: y < \frac{\mu}{2}\}$
     \item $P^{\gamma^V}(u^2|H_j) = \int_{R_2}f_{y|H_j}(y|H_j)dy$, $R_2 = \{y \in \mathcal{Y}: y \geq \frac{\mu}{2}\}$
@@ -304,70 +293,61 @@ Evaluating these integrals under the Gaussian model gives:
     \item $P(u^1|H_2) = P(y<\frac{\mu}{2}|H_2) = Q(\frac{\mu}{2\sigma})$
     \item $P(u^2|H_2) = P(y\geq\frac{\mu}{2}|H_2) = 1-Q(\frac{\mu}{2\sigma})$
 \end{itemize}
-We now compute the Chernoff coefficient of the vanilla policy:
+Substituting into the Chernoff coefficient (full derivation in Appendix~\ref{app:vanilla-derivation}) gives
 \begin{align}
-    &M_{V}(\alpha,\gamma^V) = P^{\gamma^V}(u^1|H_1)^\alpha \cdot P^{\gamma^V}(u^1|H_2)^{1-\alpha} + P^{\gamma^V}(u^2|H_1)^\alpha \cdot P^{\gamma^V}(u^2|H_2)^{1-\alpha}\\
-    &M_{V}(\alpha) = Q(\frac{\mu}{2\sigma})^{\alpha} \cdot (1-Q(\frac{\mu}{2\sigma}))^{1-\alpha} + Q(\frac{\mu}{2\sigma})^{1-\alpha} \cdot (1-Q(\frac{\mu}{2\sigma}))^{\alpha}
+    M_{V}(\alpha) = Q(\frac{\mu}{2\sigma})^{\alpha} \cdot (1-Q(\frac{\mu}{2\sigma}))^{1-\alpha} + Q(\frac{\mu}{2\sigma})^{1-\alpha} \cdot (1-Q(\frac{\mu}{2\sigma}))^{\alpha}
 \end{align}
-Since $M_V(\alpha) = M_V(1-\alpha)$, $M_V$ is symmetric about $\alpha = 0.5$; together with its convexity on $[0,1]$, this means $M_V$ attains its minimum at $\alpha = 0.5$, giving
+which is symmetric about $\alpha=0.5$ and convex on $[0,1]$, so its minimum is attained at $\alpha=0.5$, giving the Chernoff distance bound for the vanilla policy:
 \begin{align}
     \JNEE \geq -\min_{\alpha\in[0,1]}\log M_{V}(\alpha) = -\log\bigg(2 \sqrt{Q(\frac{\mu}{2\sigma}) \cdot (1-Q(\frac{\mu}{2\sigma}))}\bigg)
 \end{align}
-This is the Chernoff distance bound for the vanilla policy. We next derive the analogous bound for the silent policy so that the two can be compared directly.
+We next derive the analogous bound for the silent policy so that the two can be compared directly.
 \subsection*{Setup B - Silent}
-Now $\mathcal{U} = \{u^1, u^2, u^S\}$: the sensor still forms a local decision, but transmits it only when it is $u^1$ or $u^2$; when the decision is $u^S$, nothing is sent.
-
-We introduce two thresholds $\tau_1 < \tau_2$ on the likelihood ratio: the sensor sends $u^1$ if $L(y) < \tau_1$, $u^2$ if $L(y) > \tau_2$, and stays silent ($u^S$) otherwise:
-\begin{align*}
-    R_1 = \{y \in \mathcal{Y}: L(y) < \tau_1\}, \quad R_S = \{y \in \mathcal{Y}: \tau_1 \leq L(y) \leq \tau_2\}, \quad R_2 = \{y \in \mathcal{Y}: L(y) > \tau_2\}
-\end{align*}
-Since $L(y)$ is increasing in $y$ (Setup A), these map to thresholds on $y$: with $\lambda_i \triangleq \frac{\sigma^2}{\mu}\log(\tau_i) + \frac{\mu}{2}$ for $i=1,2$ and $\lambda_1 < \lambda_2$,
-\begin{align*}
-    R_1 = \{y < \lambda_1\}, \quad R_S = \{\lambda_1 \leq y \leq \lambda_2\}, \quad R_2 = \{y > \lambda_2\}
-\end{align*}
-giving the decision rule $\gamma^S$:
-\begin{itemize}
-    \item $P^{\gamma^S}(u^1|H_j) = \int_{R_1}f_{y|H_j}(y|H_j)dy$
-    \item $P^{\gamma^S}(u^S|H_j) = \int_{R_S}f_{y|H_j}(y|H_j)dy$
-    \item $P^{\gamma^S}(u^2|H_j) = \int_{R_2}f_{y|H_j}(y|H_j)dy$
-\end{itemize}
-Evaluating these integrals under the Gaussian model gives:
-\begin{itemize}
-    \item $P(u^1|H_1) = P(y<\lambda_1|H_1) = 1-Q(\frac{\lambda_1}{\sigma})$
-    \item $P(u^S|H_1) = P(\lambda_1\leq y\leq\lambda_2|H_1) = Q(\frac{\lambda_1}{\sigma}) - Q(\frac{\lambda_2}{\sigma})$
-    \item $P(u^2|H_1) = P(y>\lambda_2|H_1) = Q(\frac{\lambda_2}{\sigma})$
-    \item $P(u^1|H_2) = P(y<\lambda_1|H_2) = 1-Q(\frac{\lambda_1-\mu}{\sigma})$
-    \item $P(u^S|H_2) = P(\lambda_1\leq y\leq\lambda_2|H_2) = Q(\frac{\lambda_1-\mu}{\sigma}) - Q(\frac{\lambda_2-\mu}{\sigma})$
-    \item $P(u^2|H_2) = P(y>\lambda_2|H_2) = Q(\frac{\lambda_2-\mu}{\sigma})$
-\end{itemize}
-$\lambda_1$ and $\lambda_2$ are in general independent, but since the two Gaussians share variance $\sigma^2$ and differ only in mean, the optimal boundaries are symmetric about the midpoint $\frac{\mu}{2}$. We therefore parametrize them by a single variable $\delta > 0$:
+Now $\mathcal{U} = \{u^1, u^2, u^S\}$: the sensor still forms a local decision, but transmits it only when it is $u^1$ or $u^2$; when the decision is $u^S$, nothing is sent. Two thresholds $\tau_1 < \tau_2$ on the likelihood ratio map to thresholds $\lambda_1 < \lambda_2$ on $y$ (full derivation in Appendix~\ref{app:silent-derivation}). Since the two Gaussians share variance $\sigma^2$ and differ only in mean, the optimal boundaries are symmetric about the midpoint $\frac{\mu}{2}$, so we parametrize them by a single variable $\delta > 0$:
 \begin{align*}
     \lambda_1 = \frac{\mu}{2} - \delta, \qquad \lambda_2 = \frac{\mu}{2} + \delta
 \end{align*}
-reducing the optimization to a single free parameter. Denoting
+Denoting
 \begin{align*}
     q_+ \triangleq Q\Big(\frac{\mu/2+\delta}{\sigma}\Big), \qquad q_- \triangleq Q\Big(\frac{\mu/2-\delta}{\sigma}\Big)
 \end{align*}
-and substituting $\lambda_1,\lambda_2$ into the probabilities above gives:
+the resulting probabilities under the Gaussian model are:
 \begin{itemize}
     \item $P(u^1|H_1) = 1-q_-, \quad P(u^S|H_1) = q_- - q_+, \quad P(u^2|H_1) = q_+$
     \item $P(u^1|H_2) = q_+, \quad P(u^S|H_2) = q_- - q_+, \quad P(u^2|H_2) = 1-q_-$
 \end{itemize}
-We now compute the Chernoff coefficient of the silent policy:
-\begin{align}
-    &M_{S}(\alpha,\gamma^S) = P^{\gamma^S}(u^1|H_1)^\alpha P^{\gamma^S}(u^1|H_2)^{1-\alpha} + P^{\gamma^S}(u^S|H_1)^\alpha P^{\gamma^S}(u^S|H_2)^{1-\alpha}\\
-    &\qquad + P^{\gamma^S}(u^2|H_1)^\alpha P^{\gamma^S}(u^2|H_2)^{1-\alpha}\\
-    &M_{S}(\alpha) = (1-q_-)^{\alpha}q_+^{1-\alpha} + (q_--q_+)^{\alpha}(q_--q_+)^{1-\alpha} + q_+^{\alpha}(1-q_-)^{1-\alpha}
-\end{align}
-Since $P(u^S|H_1) = P(u^S|H_2) = q_--q_+$, the middle term collapses to $q_--q_+$ regardless of $\alpha$:
+Substituting into the Chernoff coefficient, the $u^S$ term collapses to $q_--q_+$ regardless of $\alpha$ since $P(u^S|H_1) = P(u^S|H_2)$ (full derivation in Appendix~\ref{app:silent-derivation}), giving
 \begin{align}
     M_{S}(\alpha) = (q_--q_+) + (1-q_-)^{\alpha}q_+^{1-\alpha} + q_+^{\alpha}(1-q_-)^{1-\alpha}
 \end{align}
-Swapping $\alpha \leftrightarrow 1-\alpha$ leaves the constant term unchanged and exchanges the remaining two, so $M_S(\alpha) = M_S(1-\alpha)$; together with convexity on $[0,1]$, this means $M_S$ attains its minimum at $\alpha = 0.5$, as in the vanilla case, giving
+which, like $M_V$, is symmetric about $\alpha=0.5$ and convex on $[0,1]$, giving the Chernoff distance bound for the silent policy:
 \begin{align}
-    \JNEE \geq -\min_{\alpha\in[0,1]}\log M_{S}(\alpha) = -\log\Big((q_--q_+) + 2\sqrt{(1-q_-)q_+}\Big)
+    \JNEE \geq -\min_{\alpha\in[0,1]}\log M_{S}(\alpha) = -\log\Big((q_--q_+) + 2\sqrt{(1-q_-)q_+}\Big) \label{eq:silent-bound}
 \end{align}
 
+\paragraph{Optimal thresholds.} So far $\delta$ (equivalently $\tau_1,\tau_2$) was fixed by assumption. At $\alpha=\tfrac12$, maximizing $\JNEE$ over $\delta$ is equivalent to minimizing the right-hand side of Equation~\eqref{eq:silent-bound} viewed as a function of $\delta$,
+\begin{equation}
+    M_S(\delta) = (q_--q_+) + 2\sqrt{(1-q_-)q_+}, \qquad q_\pm = Q\Big(\frac{\mu/2\pm\delta}{\sigma}\Big).
+    \label{eq:MS-of-delta}
+\end{equation}
+Writing $\phi_\pm \triangleq \phi\big(\frac{\mu/2\pm\delta}{\sigma}\big)$ for the standard normal density, $A \triangleq \sqrt{q_+}$, and $B \triangleq \sqrt{1-q_-}$, differentiating gives (full derivation in Appendix~\ref{app:delta})
+\begin{equation}
+    \sigma\frac{dM_S}{d\delta} = (\phi_-+\phi_+) - \frac{\phi_-A^2+\phi_+B^2}{AB} = \frac{(B-A)(\phi_-A-\phi_+B)}{AB}.
+    \label{eq:dMS}
+\end{equation}
+Since $B > A$ always ($B^2 = Q(\frac{\delta-\mu/2}{\sigma}) > Q(\frac{\delta+\mu/2}{\sigma}) = A^2$), the sign of $\frac{dM_S}{d\delta}$ is carried entirely by $\phi_-A - \phi_+B$, so stationarity requires
+\begin{equation}
+    \frac{\phi_-}{\phi_+} = \frac{B}{A} \iff e^{\mu\delta/\sigma^2} = \sqrt{\frac{1-q_-}{q_+}}.
+    \label{eq:opt-delta}
+\end{equation}
+Since $\delta = \frac{\sigma^2}{\mu}\log\tau_2$, the left-hand side is $\tau_2$, so the optimal silence thresholds satisfy
+\begin{equation}
+    \boxed{\;\tau_2^{\star\,2} = \frac{P^{\gamma^S}(u^1|H_2)}{P^{\gamma^S}(u^2|H_1)}\;}
+    \label{eq:opt-tau}
+\end{equation}
+
+\noindent\textbf{Note: the simulation below uses the fixed thresholds $\tau_1=0.5$, $\tau_2=2$ for the silent policy, not the optimal $\tau_2^\star$ derived above. It should be rerun with the optimal $\delta$ once $\tau_2^\star$ is computed for the simulated SNR.}
+\newpage
 \subsection*{Simulation}
 We now derive both bounds numerically and compare them against simulated finite-$N$ performance. \newline
 We fix the Gaussian model at $0$~dB SNR, i.e. $\mu = \sigma = 1$, with balanced priors $p = \tfrac12$.\newline 
@@ -388,12 +368,14 @@ For the silent policy we fix the two likelihood-ratio thresholds at $\tau_1 = 0.
 \paragraph{Finite-$N$ behavior.} Figure~\ref{fig:active-senders-chernoff} plots the simulated normalized exponent $J^N_{EE}$ against the number of active (transmitting) sensors, for both policies, alongside their respective Chernoff-information asymptotes $C_V$ and $C_S$ computed above. Both curves decay from a large-$N$-mismatch regime and converge to their asymptote as the sensor count grows, confirming Equation~\eqref{eq:error-exponent-bound} as the correct $N \to \infty$ limit; the silent policy's curve lies uniformly above the vanilla one, consistent with $C_S > C_V$.
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.8\textwidth]{Figs/fig_active_senders_normalized_chernoff.png}
+    \includegraphics[width=0.65\textwidth]{Figs/fig_active_senders_normalized_chernoff.png}
     \caption{Normalized error exponent $J^N_{EE}$ vs. number of active senders, SNR $= 0$~dB, for the vanilla and silent policies, with their Chernoff-information asymptotes $C_V \approx 0.0793$ and $C_S \approx 0.1007$ shown as dashed lines.}
     \label{fig:active-senders-chernoff}
 \end{figure}
 
+
 \newpage
+
 \section{Appendix}
 \subsection{Full Derivation of the Error Exponent}
 \label{app:error-exponent}
@@ -470,6 +452,129 @@ Define $\lim_{N \to \infty}\frac{N_k}{N} \triangleq c_k$ we get:
 \begin{align}
     \lim_{N \to \infty}\JNEE \geq -\min_{\alpha \in [0,1]}\sum_{k=1}^{K} c_k \log M(\alpha,\gamma^k)
 \end{align}
+
+\subsection{Vanilla Policy: Full Threshold and Chernoff Coefficient Derivation}
+\label{app:vanilla-derivation}
+We first derive the decision threshold for the vanilla setup used in Section~\ref{sec:considering-rate}. By Lemma 1, the optimal decision rule is a threshold $\tau$ on the likelihood ratio: the sensor transmits $u^2$ if
+\begin{align*}
+    L(y) = \frac{f_{y|H_2}(y|H_2)}{f_{y|H_1}(y|H_1)} \geq \tau
+\end{align*}
+and $u^1$ otherwise. Under the Gaussian assumption, $L(y)$ simplifies to
+\begin{align*}
+    L(y) = \frac{f_{y|H_2}(y|H_2)}{f_{y|H_1}(y|H_1)} = \exp\bigg(\frac{-(y-\mu)^2 + y^2}{2\sigma^2}\bigg) = \exp\bigg(\frac{2y\mu-\mu^2}{2\sigma^2}\bigg)
+\end{align*}
+Taking $\log$ gives the log-likelihood ratio
+\begin{align*}
+    \log(L(y)) = \frac{y\mu}{\sigma^2} - \frac{\mu^2}{2\sigma^2} &\geq \log(\tau) \\
+    \frac{y\mu}{\sigma^2} &\geq \log(\tau) + \frac{\mu^2}{2\sigma^2}\\
+    y &\geq \frac{\sigma^2}{\mu}\log(\tau) + \frac{\mu}{2} \triangleq \lambda_V
+\end{align*}
+Since the optimal rule corresponds to $\tau = 1$, this reduces to a threshold on $y$ at $\lambda_V = \frac{\mu}{2}$, as used in Section~\ref{sec:considering-rate}.
+
+We now compute the Chernoff coefficient of the vanilla policy:
+\begin{align}
+    &M_{V}(\alpha,\gamma^V) = P^{\gamma^V}(u^1|H_1)^\alpha \cdot P^{\gamma^V}(u^1|H_2)^{1-\alpha} + P^{\gamma^V}(u^2|H_1)^\alpha \cdot P^{\gamma^V}(u^2|H_2)^{1-\alpha}\\
+    &M_{V}(\alpha) = Q(\frac{\mu}{2\sigma})^{\alpha} \cdot (1-Q(\frac{\mu}{2\sigma}))^{1-\alpha} + Q(\frac{\mu}{2\sigma})^{1-\alpha} \cdot (1-Q(\frac{\mu}{2\sigma}))^{\alpha}
+\end{align}
+Since $M_V(\alpha) = M_V(1-\alpha)$, $M_V$ is symmetric about $\alpha = 0.5$; together with its convexity on $[0,1]$, this means $M_V$ attains its minimum at $\alpha = 0.5$, giving
+\begin{align}
+    \JNEE \geq -\min_{\alpha\in[0,1]}\log M_{V}(\alpha) = -\log\bigg(2 \sqrt{Q(\frac{\mu}{2\sigma}) \cdot (1-Q(\frac{\mu}{2\sigma}))}\bigg)
+\end{align}
+This is the Chernoff distance bound for the vanilla policy, quoted in Section~\ref{sec:considering-rate}.
+
+\subsection{Silent Policy: Full Threshold and Chernoff Coefficient Derivation}
+\label{app:silent-derivation}
+Recall the silent setup of Section~\ref{sec:considering-rate}. We introduce two thresholds $\tau_1 < \tau_2$ on the likelihood ratio: the sensor sends $u^1$ if $L(y) < \tau_1$, $u^2$ if $L(y) > \tau_2$, and stays silent ($u^S$) otherwise:
+\begin{align*}
+    R_1 = \{y \in \mathcal{Y}: L(y) < \tau_1\}, \quad R_S = \{y \in \mathcal{Y}: \tau_1 \leq L(y) \leq \tau_2\}, \quad R_2 = \{y \in \mathcal{Y}: L(y) > \tau_2\}
+\end{align*}
+Since $L(y)$ is increasing in $y$ (Appendix~\ref{app:vanilla-derivation}), these map to thresholds on $y$: with $\lambda_i \triangleq \frac{\sigma^2}{\mu}\log(\tau_i) + \frac{\mu}{2}$ for $i=1,2$ and $\lambda_1 < \lambda_2$,
+\begin{align*}
+    R_1 = \{y < \lambda_1\}, \quad R_S = \{\lambda_1 \leq y \leq \lambda_2\}, \quad R_2 = \{y > \lambda_2\}
+\end{align*}
+giving the decision rule $\gamma^S$:
+\begin{itemize}
+    \item $P^{\gamma^S}(u^1|H_j) = \int_{R_1}f_{y|H_j}(y|H_j)dy$
+    \item $P^{\gamma^S}(u^S|H_j) = \int_{R_S}f_{y|H_j}(y|H_j)dy$
+    \item $P^{\gamma^S}(u^2|H_j) = \int_{R_2}f_{y|H_j}(y|H_j)dy$
+\end{itemize}
+Evaluating these integrals under the Gaussian model gives:
+\begin{itemize}
+    \item $P(u^1|H_1) = P(y<\lambda_1|H_1) = 1-Q(\frac{\lambda_1}{\sigma})$
+    \item $P(u^S|H_1) = P(\lambda_1\leq y\leq\lambda_2|H_1) = Q(\frac{\lambda_1}{\sigma}) - Q(\frac{\lambda_2}{\sigma})$
+    \item $P(u^2|H_1) = P(y>\lambda_2|H_1) = Q(\frac{\lambda_2}{\sigma})$
+    \item $P(u^1|H_2) = P(y<\lambda_1|H_2) = 1-Q(\frac{\lambda_1-\mu}{\sigma})$
+    \item $P(u^S|H_2) = P(\lambda_1\leq y\leq\lambda_2|H_2) = Q(\frac{\lambda_1-\mu}{\sigma}) - Q(\frac{\lambda_2-\mu}{\sigma})$
+    \item $P(u^2|H_2) = P(y>\lambda_2|H_2) = Q(\frac{\lambda_2-\mu}{\sigma})$
+\end{itemize}
+$\lambda_1$ and $\lambda_2$ are in general independent, but since the two Gaussians share variance $\sigma^2$ and differ only in mean, the optimal boundaries are symmetric about the midpoint $\frac{\mu}{2}$. We therefore parametrize them by a single variable $\delta > 0$:
+\begin{align*}
+    \lambda_1 = \frac{\mu}{2} - \delta, \qquad \lambda_2 = \frac{\mu}{2} + \delta
+\end{align*}
+reducing the optimization to a single free parameter. Denoting
+\begin{align*}
+    q_+ \triangleq Q\Big(\frac{\mu/2+\delta}{\sigma}\Big), \qquad q_- \triangleq Q\Big(\frac{\mu/2-\delta}{\sigma}\Big)
+\end{align*}
+and substituting $\lambda_1,\lambda_2$ into the probabilities above gives:
+\begin{itemize}
+    \item $P(u^1|H_1) = 1-q_-, \quad P(u^S|H_1) = q_- - q_+, \quad P(u^2|H_1) = q_+$
+    \item $P(u^1|H_2) = q_+, \quad P(u^S|H_2) = q_- - q_+, \quad P(u^2|H_2) = 1-q_-$
+\end{itemize}
+as used in Section~\ref{sec:considering-rate}. We now compute the Chernoff coefficient of the silent policy:
+\begin{align}
+    &M_{S}(\alpha,\gamma^S) = P^{\gamma^S}(u^1|H_1)^\alpha P^{\gamma^S}(u^1|H_2)^{1-\alpha} + P^{\gamma^S}(u^S|H_1)^\alpha P^{\gamma^S}(u^S|H_2)^{1-\alpha}\\
+    &\qquad + P^{\gamma^S}(u^2|H_1)^\alpha P^{\gamma^S}(u^2|H_2)^{1-\alpha}\\
+    &M_{S}(\alpha) = (1-q_-)^{\alpha}q_+^{1-\alpha} + (q_--q_+)^{\alpha}(q_--q_+)^{1-\alpha} + q_+^{\alpha}(1-q_-)^{1-\alpha}
+\end{align}
+Since $P(u^S|H_1) = P(u^S|H_2) = q_--q_+$, the middle term collapses to $q_--q_+$ regardless of $\alpha$:
+\begin{align}
+    M_{S}(\alpha) = (q_--q_+) + (1-q_-)^{\alpha}q_+^{1-\alpha} + q_+^{\alpha}(1-q_-)^{1-\alpha}
+\end{align}
+Swapping $\alpha \leftrightarrow 1-\alpha$ leaves the constant term unchanged and exchanges the remaining two, so $M_S(\alpha) = M_S(1-\alpha)$; together with convexity on $[0,1]$, this means $M_S$ attains its minimum at $\alpha = 0.5$, as in the vanilla case, giving
+\begin{align}
+    \JNEE \geq -\min_{\alpha\in[0,1]}\log M_{S}(\alpha) = -\log\Big((q_--q_+) + 2\sqrt{(1-q_-)q_+}\Big)
+\end{align}
+This is the Chernoff distance bound for the silent policy, quoted in Section~\ref{sec:considering-rate}.
+
+\subsection{Optimal Silence Threshold}
+\label{app:delta}
+\paragraph{The objective.} Substituting $q_\pm = Q\big(\frac{\mu/2\pm\delta}{\sigma}\big)$ into Equation~\eqref{eq:MS-of-delta}:
+\begin{equation}
+    M_S(\delta) = \left[Q\Big(\frac{\mu/2-\delta}{\sigma}\Big) - Q\Big(\frac{\mu/2+\delta}{\sigma}\Big)\right] + 2\sqrt{\left[1-Q\Big(\frac{\mu/2-\delta}{\sigma}\Big)\right]Q\Big(\frac{\mu/2+\delta}{\sigma}\Big)}.
+    \label{eq:MS-explicit}
+\end{equation}
+Using $1-Q(x) = Q(-x)$, equivalently
+\begin{equation}
+    M_S(\delta) = 1 - Q\Big(\frac{\delta-\mu/2}{\sigma}\Big) - Q\Big(\frac{\delta+\mu/2}{\sigma}\Big) + 2\sqrt{Q\Big(\frac{\delta-\mu/2}{\sigma}\Big)Q\Big(\frac{\delta+\mu/2}{\sigma}\Big)},
+    \label{eq:MS-tails}
+\end{equation}
+giving $M_S(0) = 2\sqrt{q(1-q)} = M_V$ and $M_S(\delta)\to 1$ as $\delta\to\infty$.
+
+\paragraph{Differentiation.} $Q(x) = \int_x^\infty \frac{1}{\sqrt{2\pi}}e^{-t^2/2}dt$, so $Q'(x) = -\phi(x)$ with $\phi(x) = \frac{1}{\sqrt{2\pi}}e^{-x^2/2}$. The inner derivatives are $\mp 1/\sigma$, so
+\begin{equation}
+    \frac{d}{d\delta}\left[Q\Big(\frac{\mu/2-\delta}{\sigma}\Big) - Q\Big(\frac{\mu/2+\delta}{\sigma}\Big)\right] = \frac{1}{\sigma}\left[\phi\Big(\frac{\mu/2-\delta}{\sigma}\Big) + \phi\Big(\frac{\mu/2+\delta}{\sigma}\Big)\right].
+\end{equation}
+For $f(\delta) \triangleq \left[1-Q\Big(\frac{\mu/2-\delta}{\sigma}\Big)\right]Q\Big(\frac{\mu/2+\delta}{\sigma}\Big)$,
+\begin{equation}
+    f'(\delta) = -\frac{1}{\sigma}\phi\Big(\frac{\mu/2-\delta}{\sigma}\Big)Q\Big(\frac{\mu/2+\delta}{\sigma}\Big) - \frac{1}{\sigma}\phi\Big(\frac{\mu/2+\delta}{\sigma}\Big)\left[1-Q\Big(\frac{\mu/2-\delta}{\sigma}\Big)\right],
+\end{equation}
+and $\frac{d}{d\delta}2\sqrt{f} = f'/\sqrt{f}$. Combining:
+\begin{equation}
+    \sigma\frac{dM_S}{d\delta} = \phi\Big(\frac{\mu/2-\delta}{\sigma}\Big) + \phi\Big(\frac{\mu/2+\delta}{\sigma}\Big) - \frac{\phi\Big(\frac{\mu/2-\delta}{\sigma}\Big)Q\Big(\frac{\mu/2+\delta}{\sigma}\Big) + \phi\Big(\frac{\mu/2+\delta}{\sigma}\Big)\left[1-Q\Big(\frac{\mu/2-\delta}{\sigma}\Big)\right]}{\sqrt{\left[1-Q\Big(\frac{\mu/2-\delta}{\sigma}\Big)\right]Q\Big(\frac{\mu/2+\delta}{\sigma}\Big)}},
+    \label{eq:app-full-derivative}
+\end{equation}
+which is Equation~\eqref{eq:dMS} written out.
+
+\paragraph{Factorization.} Multiplying by $AB>0$:
+\begin{align}
+    (\phi_-+\phi_+)AB - (\phi_-A^2+\phi_+B^2) &= \phi_-A(B-A) + \phi_+B(A-B) \nonumber\\
+    &= (B-A)(\phi_-A-\phi_+B).
+\end{align}
+Since $B-A>0$, setting $M_S'=0$ forces $\phi_-A=\phi_+B$. The density ratio is closed form,
+\begin{equation}
+    \frac{\phi_-}{\phi_+} = \exp\left(\frac{(\mu/2+\delta)^2-(\mu/2-\delta)^2}{2\sigma^2}\right) = e^{\mu\delta/\sigma^2},
+\end{equation}
+which gives Equation~\eqref{eq:opt-delta}.
 
 \begin{thebibliography}{9}
 

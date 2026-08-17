@@ -1,0 +1,108 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+
+\begin{document}
+
+\section{Setup B}
+
+% ---- insert after Eq. (34), Section 5 Setup B ----
+
+\paragraph{Optimal thresholds.}
+At $\alpha=1/2$, maximizing $J^N_{EE}$ over $\delta$ is minimizing
+\begin{equation}
+M_S(\delta)=(q_--q_+)+2\sqrt{(1-q_-)q_+},\qquad
+q_\pm=Q\!\Big(\tfrac{\mu/2\pm\delta}{\sigma}\Big).
+\label{eq:MS_of_delta}
+\end{equation}
+
+Write $\phi_\pm\triangleq\phi\!\big(\tfrac{\mu/2\pm\delta}{\sigma}\big)$,
+$A\triangleq\sqrt{q_+}$, $B\triangleq\sqrt{1-q_-}$. 
+\begin{equation}
+\sigma\,\frac{dM_S}{d\delta}
+=(\phi_-+\phi_+)-\frac{\phi_-A^2+\phi_+B^2}{AB}
+=\frac{(B-A)(\phi_-A-\phi_+B)}{AB}.
+\label{eq:dMS}
+\end{equation}
+
+$B>A$ always: $B^2=Q\!\big(\tfrac{\delta-\mu/2}{\sigma}\big)>Q\!\big(\tfrac{\delta+\mu/2}{\sigma}\big)=A^2$.
+So the sign is carried entirely by $\phi_-A-\phi_+B$, and stationarity is
+\begin{equation}
+\frac{\phi_-}{\phi_+}=\frac{B}{A}
+\iff
+e^{\mu\delta/\sigma^2}=\sqrt{\frac{1-q_-}{q_+}} .
+\label{eq:opt_delta}
+\end{equation}
+
+Since $\delta=\frac{\sigma^2}{\mu}\log\tau_2$, the left side is $\tau_2$, so the optimal
+thresholds satisfy
+\begin{equation}
+\boxed{\;\tau_2^{\star\,2}=\frac{P^{\gamma^S}(u^1|H_2)}{P^{\gamma^S}(u^2|H_1)}\;}
+\label{eq:opt_tau}
+\end{equation}
+
+The full derivation, are given in
+Appendix~\ref{app:delta}.
+
+\section{Appendix}
+
+% ---- insert in Section 6, after 6.1 ----
+
+\subsection{Optimal Silence Threshold}
+\label{app:delta}
+
+\paragraph{The objective.}
+Substituting $q_\pm=Q\!\big(\tfrac{\mu/2\pm\delta}{\sigma}\big)$ into \eqref{eq:MS_of_delta}:
+\begin{equation}
+M_S(\delta)=
+\left[Q\!\left(\tfrac{\mu/2-\delta}{\sigma}\right)-Q\!\left(\tfrac{\mu/2+\delta}{\sigma}\right)\right]
++2\sqrt{\left[1-Q\!\left(\tfrac{\mu/2-\delta}{\sigma}\right)\right]Q\!\left(\tfrac{\mu/2+\delta}{\sigma}\right)} .
+\label{eq:MS_explicit}
+\end{equation}
+Using $1-Q(x)=Q(-x)$, equivalently
+\begin{equation}
+M_S(\delta)=1-Q\!\left(\tfrac{\delta-\mu/2}{\sigma}\right)-Q\!\left(\tfrac{\delta+\mu/2}{\sigma}\right)
++2\sqrt{Q\!\left(\tfrac{\delta-\mu/2}{\sigma}\right)Q\!\left(\tfrac{\delta+\mu/2}{\sigma}\right)} ,
+\label{eq:MS_tails}
+\end{equation}
+giving $M_S(0)=2\sqrt{q(1-q)}=M_V$ and $M_S(\delta)\to1$ as $\delta\to\infty$.
+
+\paragraph{Differentiation.}
+$Q(x)=\int_x^\infty\frac{1}{\sqrt{2\pi}}e^{-t^2/2}dt$, so $Q'(x)=-\phi(x)$ with
+$\phi(x)=\frac{1}{\sqrt{2\pi}}e^{-x^2/2}$. The inner derivatives are $\mp1/\sigma$, so
+\begin{equation}
+\frac{d}{d\delta}\left[Q\!\left(\tfrac{\mu/2-\delta}{\sigma}\right)-Q\!\left(\tfrac{\mu/2+\delta}{\sigma}\right)\right]
+=\frac{1}{\sigma}\left[\phi\!\left(\tfrac{\mu/2-\delta}{\sigma}\right)+\phi\!\left(\tfrac{\mu/2+\delta}{\sigma}\right)\right].
+\end{equation}
+For $f(\delta)\triangleq\left[1-Q\!\left(\tfrac{\mu/2-\delta}{\sigma}\right)\right]Q\!\left(\tfrac{\mu/2+\delta}{\sigma}\right)$,
+\begin{equation}
+f'(\delta)=-\frac{1}{\sigma}\phi\!\left(\tfrac{\mu/2-\delta}{\sigma}\right)Q\!\left(\tfrac{\mu/2+\delta}{\sigma}\right)
+-\frac{1}{\sigma}\phi\!\left(\tfrac{\mu/2+\delta}{\sigma}\right)\left[1-Q\!\left(\tfrac{\mu/2-\delta}{\sigma}\right)\right],
+\end{equation}
+and $\frac{d}{d\delta}2\sqrt{f}=f'/\sqrt{f}$. Combining:
+\begin{equation}
+\sigma\frac{dM_S}{d\delta}=
+\phi\!\left(\tfrac{\mu/2-\delta}{\sigma}\right)+\phi\!\left(\tfrac{\mu/2+\delta}{\sigma}\right)
+-\frac{\phi\!\left(\tfrac{\mu/2-\delta}{\sigma}\right)Q\!\left(\tfrac{\mu/2+\delta}{\sigma}\right)
++\phi\!\left(\tfrac{\mu/2+\delta}{\sigma}\right)\left[1-Q\!\left(\tfrac{\mu/2-\delta}{\sigma}\right)\right]}
+{\sqrt{\left[1-Q\!\left(\tfrac{\mu/2-\delta}{\sigma}\right)\right]Q\!\left(\tfrac{\mu/2+\delta}{\sigma}\right)}} ,
+\label{eq:app_full}
+\end{equation}
+which is \eqref{eq:dMS} written out.
+
+\paragraph{Factorization.}
+Multiplying by $AB>0$:
+\begin{align}
+(\phi_-+\phi_+)AB-\left(\phi_-A^2+\phi_+B^2\right)
+&=\phi_-A(B-A)+\phi_+B(A-B) \nonumber\\
+&=(B-A)\left(\phi_-A-\phi_+B\right).
+\end{align}
+Since $B-A>0$, setting $M_S'=0$ forces $\phi_-A=\phi_+B$. The density ratio is closed form,
+\begin{equation}
+\frac{\phi_-}{\phi_+}=\exp\!\left(\frac{(\mu/2+\delta)^2-(\mu/2-\delta)^2}{2\sigma^2}\right)
+=e^{\mu\delta/\sigma^2},
+\end{equation}
+which gives \eqref{eq:opt_delta}.
+
+\end{document}

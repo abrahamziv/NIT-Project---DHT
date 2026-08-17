@@ -1,0 +1,268 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage{cite}
+
+\newcommand{\Hone}{\mathsf{H}_1}
+\newcommand{\Htwo}{\mathsf{H}_2}
+\newcommand{\Pe}{P_{\mathrm e}}
+\newcommand{\EE}{E_N}
+\newcommand{\Qfun}{Q}
+
+\title{Rate-Aware Decentralized Detection with Many Sensors}
+
+\author{%
+\IEEEauthorblockN{Oren Ram and Ziv Abraham}
+\IEEEauthorblockA{Department / Institution\\
+City, Country\\
+Email addresses}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\textit{[Abstract placeholder.]}
+\end{abstract}
+
+\begin{IEEEkeywords}
+decentralized detection, sensor networks, error exponent, Chernoff information, communication rate
+\end{IEEEkeywords}
+
+\section{Introduction}
+\textit{[Introduction placeholder.]}
+
+\section{Problem Formulation}
+Consider binary hypotheses $\Hone$ and $\Htwo$ with priors
+$P(\Hone)=p$ and $P(\Htwo)=1-p$.  Sensor $i\in\{1,\ldots,N\}$
+observes $Y_i\in\mathcal{Y}$ and applies an encoder
+$\gamma_i:\mathcal{Y}\to\mathcal{U}$.  Its message
+$U_i=\gamma_i(Y_i)$ is available to a fusion center (FC), which uses
+$\gamma_0:\mathcal{U}^N\to\{1,2\}$ to produce the final decision
+$U_0=\gamma_0(U_{1:N})$.
+
+Under uniform error cost,
+\begin{equation}
+ c(\mathsf{H}_j,U_0)=\mathbf{1}_{\{U_0\ne j\}},\qquad
+ J^N(\gamma_{0:N})=\mathbb{E}^{\gamma_{0:N}}[c(\mathsf{H},U_0)].
+ \label{eq:bayes-risk}
+\end{equation}
+Thus, $J^N=\Pe$ is the Bayes probability of error.  We use the
+positive normalized error exponent
+\begin{equation}
+ \EE(\gamma_{0:N})=-\frac{1}{N}\log J^N(\gamma_{0:N}),
+ \label{eq:error-exponent}
+\end{equation}
+which is maximized when the error probability decays rapidly.
+
+\subsection{Assumptions}
+The analysis uses the following assumptions.
+\begin{enumerate}
+ \item The observations $Y_1,\ldots,Y_N$ are independent and
+ identically distributed conditioned on the true hypothesis.
+ \item Under both hypotheses, the observation laws have densities
+ $f_{Y|\mathsf{H}}(y|\mathsf{H}_j)$ with respect to a common reference
+ measure.
+ \item All sensors have the same finite message alphabet $\mathcal{U}$.
+ \item The likelihood ratio
+ \begin{equation}
+  L(y)=\frac{f_{Y|\mathsf{H}}(y|\Htwo)}
+  {f_{Y|\mathsf{H}}(y|\Hone)}
+  \label{eq:lr}
+ \end{equation}
+ is regular enough that threshold encoders are well defined; in
+ particular, its derivative is continuous and nonsingular almost
+ surely on the observation space.
+ \item The FC knows the sensor encoders, including any realized common
+ randomization, as well as the received messages.
+\end{enumerate}
+
+Under these conditions, the likelihood ratio is a sufficient statistic
+at each sensor.  The results of \cite{Sanjari2025} guarantee an optimal
+finite-population solution with threshold encoders and a maximum a
+posteriori (MAP) decoder.  They also show that identical independent
+sensor policies are optimal in the infinite-population problem and
+asymptotically optimal for large finite populations.
+
+\subsection{MAP fusion rule}
+For fixed deterministic encoders, define
+\begin{equation}
+ \Delta_N(U_{1:N})=\frac{1}{N}\sum_{i=1}^{N}
+ \log\frac{P^{\gamma_i}(U_i|\Hone)}
+ {P^{\gamma_i}(U_i|\Htwo)}.
+ \label{eq:delta}
+\end{equation}
+The MAP rule is
+\begin{equation}
+ \gamma_0^*(U_{1:N})=
+ \begin{cases}
+  1, & \Delta_N(U_{1:N})\ge t_N,\\
+  2, & \Delta_N(U_{1:N})<t_N,
+ \end{cases}
+ \quad
+ t_N=\frac{1}{N}\log\frac{1-p}{p}.
+ \label{eq:map}
+\end{equation}
+
+\section{Error-Exponent Characterization}
+For a sensor policy $\gamma_i$, define the policy-dependent Chernoff
+coefficient
+\begin{equation}
+ M(\alpha,\gamma_i)=\sum_{u\in\mathcal{U}}
+ P^{\gamma_i}(u|\Htwo)^{1-\alpha}
+ P^{\gamma_i}(u|\Hone)^{\alpha},
+ \quad 0\le\alpha\le1.
+ \label{eq:chernoff-coefficient}
+\end{equation}
+Applying Chernoff bounds to the two MAP error events gives
+\begin{equation}
+ \Pe\le 2p^{\alpha}(1-p)^{1-\alpha}
+ \prod_{i=1}^{N}M(\alpha,\gamma_i).
+ \label{eq:pe-bound}
+\end{equation}
+Suppose that the sensors use $K$ distinct policies and that a fraction
+$c_k$ uses policy $\gamma_k$, where $c_k\ge0$ and
+$\sum_{k=1}^{K}c_k=1$.  From \eqref{eq:pe-bound},
+\begin{equation}
+ \liminf_{N\to\infty}\EE(\gamma_{0:N})
+ \ge -\min_{\alpha\in[0,1]}
+ \sum_{k=1}^{K}c_k\log M(\alpha,\gamma_k).
+ \label{eq:mixed-exponent}
+\end{equation}
+For an identical policy $\gamma$, this becomes the Chernoff information
+between the two induced message distributions:
+\begin{equation}
+ C_\gamma=-\min_{\alpha\in[0,1]}\log
+ \left(\sum_{u\in\mathcal{U}}
+ P^{\gamma}(u|\Htwo)^{1-\alpha}
+ P^{\gamma}(u|\Hone)^{\alpha}\right).
+ \label{eq:chernoff-information}
+\end{equation}
+The structural result in \cite{Sanjari2025} therefore reduces the
+large-network design to selecting one encoder that maximizes
+$C_\gamma$, subject here to a communication-rate constraint.
+
+\section{Rate-Aware Gaussian Policies}
+Assume
+\begin{equation}
+ Y_i|\Hone\sim\mathcal{N}(0,\sigma^2),\qquad
+ Y_i|\Htwo\sim\mathcal{N}(\mu,\sigma^2),
+ \label{eq:gaussian-model}
+\end{equation}
+with $\mu>0$.  Then
+\begin{equation}
+ \log L(y)=\frac{\mu y}{\sigma^2}-\frac{\mu^2}{2\sigma^2}.
+ \label{eq:gaussian-llr}
+\end{equation}
+We compare an always-transmit binary policy with a confidence-based
+policy that can remain silent.  Let
+$\Qfun(x)=\int_x^\infty(2\pi)^{-1/2}e^{-z^2/2}\,dz$.
+
+\subsection{Always-transmit policy}
+For the symmetric threshold $\lambda_{\mathrm V}=\mu/2$, let $u_1$ be
+sent below the threshold and $u_2$ otherwise.  With
+$q=\Qfun(\mu/(2\sigma))$, the induced probabilities are
+\begin{align}
+ P(u_1|\Hone)&=P(u_2|\Htwo)=1-q,\nonumber\\
+ P(u_2|\Hone)&=P(u_1|\Htwo)=q.
+ \label{eq:vanilla-probabilities}
+\end{align}
+The Chernoff coefficient is symmetric about $\alpha=1/2$, and hence
+\begin{equation}
+ C_{\mathrm V}=-\log\left(2\sqrt{q(1-q)}\right).
+ \label{eq:vanilla-exponent}
+\end{equation}
+Every sensor transmits one bit, so the total rate is
+$R_{\mathrm V}=N$ bits per observation interval.
+
+\subsection{Silent policy}
+Introduce a no-transmission symbol $u_{\mathrm S}$ and symmetric
+thresholds
+\begin{equation}
+ \lambda_1=\frac{\mu}{2}-\delta,\qquad
+ \lambda_2=\frac{\mu}{2}+\delta,
+ \quad \delta>0.
+ \label{eq:silent-thresholds}
+\end{equation}
+The sensor sends $u_1$ for $Y_i<\lambda_1$, remains silent for
+$\lambda_1\le Y_i\le\lambda_2$, and sends $u_2$ for
+$Y_i>\lambda_2$.  Define
+\begin{equation}
+ q_+=\Qfun\!\left(\frac{\mu/2+\delta}{\sigma}\right),\qquad
+ q_-=\Qfun\!\left(\frac{\mu/2-\delta}{\sigma}\right).
+ \label{eq:qpm}
+\end{equation}
+The message probabilities are
+\begin{align}
+ (P(u_1|\Hone),P(u_{\mathrm S}|\Hone),P(u_2|\Hone))
+   &=(1-q_-,q_--q_+,q_+),\nonumber\\
+ (P(u_1|\Htwo),P(u_{\mathrm S}|\Htwo),P(u_2|\Htwo))
+   &=(q_+,q_--q_+,1-q_-).
+ \label{eq:silent-probabilities}
+\end{align}
+Again, symmetry gives the minimizing Chernoff parameter
+$\alpha=1/2$, so
+\begin{equation}
+ C_{\mathrm S}(\delta)=-\log\left(
+ q_--q_+ +2\sqrt{(1-q_-)q_+}\right).
+ \label{eq:silent-exponent}
+\end{equation}
+The probability of transmission is
+$\rho(\delta)=1-q_-+q_+$ under either hypothesis.  If an active sensor
+sends one bit and silence is detected at no bit cost, then
+\begin{equation}
+ R_{\mathrm S}(\delta)=N\rho(\delta)
+ \label{eq:silent-rate}
+\end{equation}
+is the expected total rate.  Equations \eqref{eq:silent-exponent} and
+\eqref{eq:silent-rate} expose the detection--communication tradeoff;
+$\delta$ can be selected by
+\begin{equation}
+ \max_{\delta>0}\ C_{\mathrm S}(\delta)
+ \quad\text{subject to}\quad R_{\mathrm S}(\delta)\le R_{\max}.
+ \label{eq:rate-optimization}
+\end{equation}
+
+\section{Numerical Evaluation}
+For the baseline experiment, use balanced priors and $0$ dB SNR:
+$p=1/2$ and $\mu=\sigma=1$.  Then
+$q=\Qfun(0.5)\approx0.3085$ and
+\begin{equation}
+ C_{\mathrm V}\approx0.0793.
+\end{equation}
+For likelihood-ratio thresholds $\tau_1=0.5$ and $\tau_2=2$,
+$\delta=\log 2$, $q_+\approx0.1164$, and $q_-\approx0.5766$.  Hence
+\begin{equation}
+ C_{\mathrm S}\approx0.1007,\qquad
+ \rho\approx0.5398.
+ \label{eq:numerical-silent}
+\end{equation}
+This example predicts a larger asymptotic exponent while only about
+$54\%$ of the sensors transmit.  A complete evaluation should compare
+finite-$N$ MAP error probabilities, the limits in
+\eqref{eq:vanilla-exponent} and \eqref{eq:silent-exponent}, and the
+rate--exponent curve obtained by varying $\delta$.
+
+\section{Conclusion}
+The proposed structure combines the optimal-policy results for large
+sensor populations with a rate-aware encoder.  The main remaining task
+is to optimize the silent region and verify the finite-population
+detection--communication tradeoff numerically.
+
+\begin{thebibliography}{9}
+\bibitem{Sanjari2025}
+S. Sanjari, N. Saldi, S. Gezici, and S. Y\"uksel,
+``Decentralized detection with many sensors: Optimality of exchangeable
+and identical encoding policies,'' arXiv:2509.21724, Sept. 2025.
+
+\bibitem{Tsitsiklis1989}
+J. N. Tsitsiklis, ``Decentralized detection,'' MIT Laboratory for
+Information and Decision Systems, Tech. Rep. LIDS-P-1913, 1989.
+
+\bibitem{Chernoff1952}
+H. Chernoff, ``A measure of asymptotic efficiency for tests of a
+hypothesis based on the sum of observations,'' \emph{Ann. Math. Stat.},
+vol. 23, no. 4, pp. 493--507, 1952.
+\end{thebibliography}
+
+\end{document}
