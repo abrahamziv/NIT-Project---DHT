@@ -109,6 +109,114 @@ def test_n_max_guard_raises():
     raise AssertionError("expected ValueError from N_max guard")
 
 
+# Tilted-vs-exact comparisons: well above measured deviations (1e-14 at M=2,
+# 6e-9 at M=17), far below plotting resolution. Exact-path anchors stay 1e-12.
+TILTED_RTOL = 1e-6
+
+
+def _m17_encoder(model):
+    """A 17-cell threshold encoder, the large-M cross-validation channel."""
+    return ThresholdEncoder(model.likelihood_ratio(np.linspace(-3.0, 4.0, 16)))
+
+
+def test_tilted_matches_exact_deep_tail_m2():
+    # At M=2 the exact path is O(N), so it reaches log J^N ~ -240: the
+    # deepest available anchor, 100+ orders below Monte Carlo reach.
+    model = GaussianShift.from_snr_db(0.0)
+    enc = LRTEncoder(1.0)
+    fe, ft = FusionCenter(), FusionCenter(method="tilted")
+    for N in (50, 200, 1000, 3000):
+        bank = EncoderBank.identical(enc, N)
+        np.testing.assert_allclose(
+            ft.log_error_prob(bank, model), fe.log_error_prob(bank, model), rtol=TILTED_RTOL
+        )
+
+
+def test_tilted_matches_exact_large_m():
+    model = GaussianShift.from_snr_db(0.0)
+    bank = EncoderBank.identical(_m17_encoder(model), 6)
+    exact = FusionCenter().log_error_prob(bank, model)
+    tilted = FusionCenter(method="tilted").log_error_prob(bank, model)
+    np.testing.assert_allclose(tilted, exact, rtol=TILTED_RTOL)
+
+
+def test_tilted_matches_exact_heterogeneous():
+    # Two distinct policies with different alphabets exercise the K-group
+    # CGF sum and per-group FFT powers.
+    model = GaussianShift.from_snr_db(0.0)
+    enc5 = ThresholdEncoder(model.likelihood_ratio(np.linspace(-1.5, 2.5, 4)))
+    bank = EncoderBank.from_fractions([(enc5, 0.5), (LRTEncoder(1.0), 0.5)], 40)
+    exact = FusionCenter().log_error_prob(bank, model)
+    tilted = FusionCenter(method="tilted").log_error_prob(bank, model)
+    np.testing.assert_allclose(tilted, exact, rtol=TILTED_RTOL)
+
+
+def test_example1_through_tilted_backend():
+    # Exercises the infinite-atom branch: policy A isolates the y=3 cell,
+    # which has zero mass under H1.
+    model, a, b = example1()
+    ft = FusionCenter(method="tilted")
+    np.testing.assert_allclose(
+        np.exp(ft.log_error_prob(EncoderBank.identical(a, 2), model)), 53 / 225, rtol=TILTED_RTOL
+    )
+    np.testing.assert_allclose(
+        np.exp(ft.log_error_prob(EncoderBank.identical(b, 2), model)), 2 / 9, rtol=TILTED_RTOL
+    )
+    np.testing.assert_allclose(
+        np.exp(ft.log_error_prob(EncoderBank([a, b]), model)), 19 / 90, rtol=TILTED_RTOL
+    )
+
+
+def test_tilted_tie_handling_symmetric_bank():
+    # LRT(1.0) on GaussianShift(1.0) has atoms +-lambda, so at even N and
+    # p = 0.5 an atom of the sum sits exactly at Nt = 0. The exact path sends
+    # that tie to the H2-error side; the tilted tail split must match, or the
+    # error here is O(1), not O(grid).
+    model = GaussianShift(1.0)
+    bank = EncoderBank.identical(LRTEncoder(1.0), 100)
+    exact = FusionCenter().log_error_prob(bank, model)
+    tilted = FusionCenter(method="tilted").log_error_prob(bank, model)
+    np.testing.assert_allclose(tilted, exact, rtol=TILTED_RTOL)
+
+
+def test_tilted_nonuniform_prior():
+    model = GaussianShift(1.0, p=0.7)
+    enc5 = ThresholdEncoder(model.likelihood_ratio(np.linspace(-1.5, 2.5, 4)))
+    bank = EncoderBank.identical(enc5, 30)
+    exact = FusionCenter(p=0.7).log_error_prob(bank, model)
+    tilted = FusionCenter(p=0.7, method="tilted").log_error_prob(bank, model)
+    np.testing.assert_allclose(tilted, exact, rtol=TILTED_RTOL)
+
+
+def test_tilted_extreme_t_returns_trivial_tails():
+    # Nt outside the range of achievable lambda sums: no saddlepoint exists
+    # and the tails are exactly 0 and 1, so J = min-side prior exactly.
+    model = GaussianShift(1.0)
+    bank = EncoderBank.identical(LRTEncoder(1.0), 4)
+    for t in (10.0, -10.0):
+        fc = FusionCenter(t=t, method="tilted")
+        np.testing.assert_allclose(np.exp(fc.log_error_prob(bank, model)), 0.5, rtol=1e-12)
+
+
+def test_tilted_exponent_dominates_chernoff_beyond_exact_reach():
+    # At M=17, N=2000 the exact path is combinatorially infeasible; the
+    # Chernoff bound (valid for every N at p = 1/2) still applies.
+    model = GaussianShift.from_snr_db(0.0)
+    bank = EncoderBank.identical(_m17_encoder(model), 2000)
+    fc = FusionCenter(method="tilted")
+    assert fc.total_exponent(bank, model) >= fc.chernoff_bound(bank, model) - 1e-6
+
+
+def test_unknown_method_raises():
+    model = GaussianShift(1.0)
+    bank = EncoderBank.identical(LRTEncoder(1.0), 2)
+    try:
+        FusionCenter(method="auto").log_error_prob(bank, model)
+    except ValueError:
+        return
+    raise AssertionError("expected ValueError for unknown method")
+
+
 def test_exact_composition_guard_raises():
     # A single identical group bypasses the N_max (distinct policies) guard;
     # the guard on C(N+M-1, M-1) itself must refuse instead of hanging.
