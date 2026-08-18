@@ -1,0 +1,47 @@
+{
+  "label": "N200_setupA_vs_R",
+  "timestamp": "2026-08-17_140129",
+  "meta": {
+    "model": {
+      "type": "GaussianShift",
+      "snr_db": 0.0,
+      "mu": 1.0,
+      "sigma": 1.0,
+      "p": 0.5
+    },
+    "delta": 0.25,
+    "bank": "identical ThresholdEncoder(L)",
+    "x": "R",
+    "N": 200
+  },
+  "data": {
+    "R": [
+      1.0,
+      2.0
+    ],
+    "L": [
+      2.0,
+      4.0
+    ],
+    "N": [
+      200.0,
+      200.0
+    ],
+    "total_exponent": [
+      18.492812136999767,
+      18.61483388313994
+    ],
+    "normalized_exponent": [
+      0.09246406068499884,
+      0.09307416941569971
+    ],
+    "N_active": [
+      200.0,
+      200.0
+    ],
+    "mean_rate": [
+      1.0,
+      2.0
+    ]
+  }
+}
