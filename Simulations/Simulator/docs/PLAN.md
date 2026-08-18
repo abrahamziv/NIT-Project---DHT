@@ -52,6 +52,22 @@ to be filled in later.
   the bound; the test asserts `total_exponent >= chernoff_bound`.
 - **`DiscreteLR` model added.** Not in the spec, but required to run
   Example 1 (finite observation alphabet with a zero-probability cell).
+- **Second fusion backend added** (`FusionCenter(method="tilted")`, see
+  `SADDLEPOINT_PLAN.md`). The exact convolution path enumerates
+  C(N+M-1, M-1) count vectors and cannot reach large N and M together;
+  the tilted (saddlepoint) backend computes each tail via the CGF with
+  only an O(1) residual done numerically (FFT). Decisions taken: the
+  backend is named explicitly (`method`, default `"exact"` so existing
+  call sites are unchanged); `method`/`G`/`nsig` are recorded in every
+  sweep result under the `fusion` key (runs predating the field are all
+  exact); the exact path gained a guard on its count-vector total
+  (`MAX_EXACT_TERMS`) since the `N_max` guard only counted distinct
+  policies and an identical bank bypassed it; the exact path is the test
+  oracle for the tilted one, cross-validated on both axes independently
+  plus a test-only Bahadur-Rao oracle where neither anchor reaches.
+  Recorded trap: atoms must be snapped to the FFT lattice — sampling the
+  exact characteristic function at the DFT frequencies converges cleanly
+  to a wrong answer for these non-lattice atom values.
 
 ## Example 1 (regression anchor)
 

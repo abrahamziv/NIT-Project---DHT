@@ -183,6 +183,15 @@ Two regimes, selected automatically from the bank:
 
 All arithmetic in log domain via `gammaln` / `logsumexp`; raw probabilities are never materialized.
 
+### Two backends
+
+The exact path above enumerates $\binom{N+M-1}{M-1}$ count vectors per group, which explodes in $N$ and $M$ jointly. `FusionCenter` therefore takes an explicit `method`:
+
+- **`method="exact"`** (default) — the convolution path above. Guarded: it raises when the count-vector total exceeds `MAX_EXACT_TERMS` (1e8) instead of hanging. Produces every reported number where it is feasible, and is the test oracle for the other backend.
+- **`method="tilted"`** — exponential tilting (saddlepoint), for large $N$ and $M$. Each tail is $e^{N\Lambda(\theta^\star) - \theta^\star Nt}$ (closed form, log-domain, carries the whole dynamic range) times an $O(1)$ tilted residual computed by FFT on a lattice ($G$ grid points, window $\pm$`nsig` tilted standard deviations; both knobs on the constructor and recorded per run). Cost is flat in $N$ and near-flat in $M$. Cross-validated against the exact path on both axes independently ($M=2$ ladder to $N=3000$, $M=17$ at small $N$) and against a Bahadur-Rao second oracle where neither exact anchor reaches; see `docs/SADDLEPOINT_PLAN.md` for the design, including why the atoms must be snapped to the lattice (sampling the exact CF off-lattice converges to a wrong answer).
+
+Every sweep result records `fc.meta()` (`method`, plus `G` and `nsig` when tilted) under the `fusion` key, so a `data.json` never leaves the reader guessing which algorithm produced a number. Runs predating the field are all `"exact"`.
+
 ### Empirical path (validation only)
 
 Draw $H^\star$, draw $y^{1:N}$, encode, call `decide`, count mistakes over $T$ trials:

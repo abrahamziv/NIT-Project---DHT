@@ -201,6 +201,14 @@ class FusionCenter:
         self.G = G  # tilted backend: FFT grid size
         self.nsig = nsig  # tilted backend: window half-width in tilted std devs
 
+    def meta(self):
+        """Backend identification for run metadata; a data.json should never
+        leave the reader guessing which algorithm produced a number."""
+        m = {"method": self.method}
+        if self.method == "tilted":
+            m.update(G=self.G, nsig=self.nsig)
+        return m
+
     def _Nt(self, N):
         if self.t is not None:
             return N * self.t
