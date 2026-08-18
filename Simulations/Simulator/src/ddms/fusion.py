@@ -121,13 +121,17 @@ class FusionCenter:
             dist = _convolve(dist, d)
         return dist
 
-    def log_error_prob(self, bank, model):
-        """Exact log J^N."""
+    def _log_tails(self, bank, model, nt):
+        """(log P(S < nt | H1), log P(S >= nt | H2)) -- the two error tails."""
         vals, lw1, lw2 = self._delta_dist(bank, model)
-        nt = self._Nt(len(bank))
         below, above = vals < nt, vals >= nt
         le1 = logsumexp(lw1[below]) if below.any() else -np.inf  # P(H2 hat | H1)
         le2 = logsumexp(lw2[above]) if above.any() else -np.inf  # P(H1 hat | H2)
+        return le1, le2
+
+    def log_error_prob(self, bank, model):
+        """Exact log J^N."""
+        le1, le2 = self._log_tails(bank, model, self._Nt(len(bank)))
         return logsumexp([np.log(self.p) + le1, np.log1p(-self.p) + le2])
 
     def total_exponent(self, bank, model):
