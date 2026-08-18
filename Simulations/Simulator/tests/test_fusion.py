@@ -207,6 +207,37 @@ def test_tilted_exponent_dominates_chernoff_beyond_exact_reach():
     assert fc.total_exponent(bank, model) >= fc.chernoff_bound(bank, model) - 1e-6
 
 
+def test_bahadur_rao_agrees_with_tilted_beyond_exact_reach():
+    # Independent second oracle for the region no exact anchor can reach
+    # (N and M both large): the first-order Bahadur-Rao tail approximation,
+    # derived from the same CGF but with no FFT and no grid. It is a
+    # large-N asymptotic, so its agreement tightens with N (measured:
+    # 2e-3 at N=100, 7e-5 at N=500, 1e-7 at N=2000).
+    from scipy.special import logsumexp
+
+    from ddms.fusion import _cgf, _hyp_atoms, _saddlepoint
+
+    def br_log_tail(parts, nt):
+        theta = _saddlepoint(parts, nt)
+        cgf, _, var = _cgf(theta, parts)
+        return cgf - theta * nt - np.log(abs(theta) * np.sqrt(2 * np.pi * var))
+
+    model = GaussianShift.from_snr_db(0.0)
+    ft = FusionCenter(method="tilted")
+    for N, rtol in ((500, 1e-3), (2000, 1e-5)):
+        bank = EncoderBank.identical(_m17_encoder(model), N)
+        parts = {
+            j: [(*_hyp_atoms(e, model, j), n) for e, n in bank.groups()] for j in (1, 2)
+        }
+        br = logsumexp(
+            [
+                np.log(0.5) + br_log_tail(parts[1], 0.0),
+                np.log(0.5) + br_log_tail(parts[2], 0.0),
+            ]
+        )
+        np.testing.assert_allclose(br, ft.log_error_prob(bank, model), rtol=rtol)
+
+
 def test_unknown_method_raises():
     model = GaussianShift(1.0)
     bank = EncoderBank.identical(LRTEncoder(1.0), 2)
