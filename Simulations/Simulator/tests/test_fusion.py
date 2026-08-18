@@ -109,6 +109,20 @@ def test_n_max_guard_raises():
     raise AssertionError("expected ValueError from N_max guard")
 
 
+def test_exact_composition_guard_raises():
+    # A single identical group bypasses the N_max (distinct policies) guard;
+    # the guard on C(N+M-1, M-1) itself must refuse instead of hanging.
+    model = GaussianShift(1.0)
+    enc = ThresholdEncoder(np.exp(np.linspace(-1.5, 1.5, 16)))  # M = 17
+    bank = EncoderBank.identical(enc, 100)  # C(116, 16) ~ 1.9e19 count vectors
+    try:
+        FusionCenter().log_error_prob(bank, model)
+    except ValueError as e:
+        assert "tilted" in str(e)
+        return
+    raise AssertionError("expected ValueError from composition-count guard")
+
+
 def test_decide_raises_on_padded_cell():
     model = GaussianShift(1.0)
     bank = EncoderBank([LRTEncoder(1.0), ThresholdEncoder([0.5, 1.0, 2.0])])

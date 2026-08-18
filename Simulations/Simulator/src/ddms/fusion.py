@@ -6,9 +6,16 @@ S = N * Delta_N is built as an N-fold convolution of per-sensor atomic
 distributions, carrying log-weights under both hypotheses at once.
 """
 
+import math
+
 import numpy as np
 from scipy.optimize import minimize_scalar
 from scipy.special import gammaln, logsumexp
+
+# Cap on count vectors the exact path may enumerate: the product over groups
+# of C(n_k + M_k - 1, M_k - 1). 1e8 keeps every size ever run (N=200, M=5 is
+# 7e7) while refusing the combinatorially infeasible ones instead of hanging.
+MAX_EXACT_TERMS = 100_000_000
 
 
 def _atoms(enc, model):
@@ -115,7 +122,14 @@ class FusionCenter:
                 f"{len(groups)} distinct policies exceeds N_max={self.N_max}; "
                 "use empirical_error_prob instead"
             )
-        dists = [_group_dist(*_atoms(enc, model), n) for enc, n in groups]
+        atoms = [(_atoms(enc, model), n) for enc, n in groups]
+        terms = math.prod(math.comb(n + a[0].size - 1, a[0].size - 1) for a, n in atoms)
+        if terms > MAX_EXACT_TERMS:
+            raise ValueError(
+                f"exact path would enumerate {float(terms):.2e} count vectors "
+                f"(cap {MAX_EXACT_TERMS:.0e}); use method='tilted'"
+            )
+        dists = [_group_dist(*a, n) for a, n in atoms]
         dist = dists[0]
         for d in dists[1:]:
             dist = _convolve(dist, d)
