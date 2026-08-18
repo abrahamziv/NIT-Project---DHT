@@ -43,8 +43,8 @@ C_silence = chernoff_distance(silence.cell_probs(model, 1), silence.cell_probs(m
 
 fig, ax = plt.subplots(figsize=(7, 5))
 
-ax.plot(run_vanilla["data"]["active_count"], run_vanilla["data"]["normalized_exponent"], label="Vanilla", color="C0")
-ax.axhline(C_vanilla, linestyle="--", color="C0", alpha=0.6, label=f"Vanilla Chernoff info = {C_vanilla:.4f}")
+ax.plot(run_vanilla["data"]["active_count"], run_vanilla["data"]["normalized_exponent"], label="Always-Transmit", color="C0")
+ax.axhline(C_vanilla, linestyle="--", color="C0", alpha=0.6, label=f"Always-Transmit Chernoff info = {C_vanilla:.4f}")
 
 ax.plot(run_silence["data"]["active_count"], run_silence["data"]["normalized_exponent"], label="Silence", color="C1")
 ax.axhline(C_silence, linestyle="--", color="C1", alpha=0.6, label=f"Silence Chernoff info = {C_silence:.4f}")
@@ -53,10 +53,15 @@ ax.set_xlabel("sensors that sent data")
 ax.set_ylabel(r"$J^N_{EE} = -\frac{1}{N}\log J^N$")
 ax.set_title(f"Normalized exponent vs. active senders, SNR {snr_db:g} dB")
 ax.legend()
-fig.tight_layout()
+fig.tight_layout(rect=(0, 0.05, 1, 1))
+fig.text(
+    0.5, 0.01,
+    r"Note: $J^N_{EE}$ normalizes by total $N$, not by the active-sender count shown on the x-axis.",
+    ha="center", va="bottom", fontsize=8,
+)
 
 out_path = compare_dir / "fig_active_senders_normalized_chernoff.png"
 fig.savefig(out_path, dpi=200)
-print(f"Vanilla Chernoff information: {C_vanilla}")
+print(f"Always-Transmit Chernoff information: {C_vanilla}")
 print(f"Silence Chernoff information: {C_silence}")
 print(f"saved {out_path}")
