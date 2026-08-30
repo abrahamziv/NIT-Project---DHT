@@ -1,6 +1,6 @@
 import numpy as np
 
-from ddms import EncoderBank, GaussianShift, LRTEncoder, ThresholdEncoder
+from ddms import EncoderBank, FusionCenter, GaussianShift, LRTEncoder, ThresholdEncoder
 from ddms.sweep import sweep_over_N, sweep_over_R, sweep_over_rate, sweep_over_snr
 
 
@@ -12,6 +12,18 @@ def test_sweep_over_n_shapes_and_monotonicity():
     assert res["total_exponent"].shape == (4,)
     assert np.all(np.diff(res["total_exponent"]) > 0)
     np.testing.assert_array_equal(res["total_rate"], ns)
+
+
+def test_sweep_records_fusion_backend():
+    # Every sweep result names the backend that produced it, so no saved
+    # data.json leaves the reader guessing.
+    model = GaussianShift(1.0)
+    make_bank = lambda n: EncoderBank.identical(LRTEncoder(1.0), n)
+    assert sweep_over_N(model, make_bank, [2])["fusion"] == {"method": "exact"}
+    res = sweep_over_N(
+        model, make_bank, [2], fc=FusionCenter(p=model.p, method="tilted", G=2**16)
+    )
+    assert res["fusion"] == {"method": "tilted", "G": 2**16, "nsig": 14.0}
 
 
 def test_sweep_over_snr_monotone():

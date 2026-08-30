@@ -26,6 +26,8 @@ be compared and overlaid with `fig_compare_runs.py`.
     src/ddms/encoder.py  Encoder, EncoderBank; VanillaEncoder is the
                          empty template to fill in
     src/ddms/fusion.py   Fusion Center (exact J^N, Chernoff bound)
+    src/ddms/policy_opt.py  optimal (Delta, delta) for the section-5 R-bit
+                         policy; Bahadur-Rao refined exponent
     src/ddms/sweep.py    parameter sweeps
     src/ddms/runs.py     save_run / load_run for grouped, timestamped run dirs
     figs/                one script per figure, output into runs/

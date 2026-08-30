@@ -333,11 +333,6 @@ INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmex10.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmti10.tfm
-INPUT ./Figs/fig_active_senders_normalized_chernoff.png
-INPUT ./Figs/fig_active_senders_normalized_chernoff.png
-INPUT ./Figs/fig_active_senders_normalized_chernoff.png
-INPUT ./Figs/fig_active_senders_normalized_chernoff.png
-INPUT ./Figs/fig_active_senders_normalized_chernoff.png
 INPUT DDMS.aux
 INPUT ./DDMS.out
 INPUT ./DDMS.out

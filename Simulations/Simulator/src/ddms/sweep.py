@@ -32,7 +32,7 @@ def sweep_over_N(model, make_bank, Ns, fc=None):
     """make_bank(N) -> EncoderBank. Sweeps the number of sensors."""
     fc = FusionCenter(p=model.p) if fc is None else fc
     rows = [_evaluate(fc, make_bank(N), model) for N in Ns]
-    return _collect(rows, {"N": np.asarray(list(Ns))})
+    return _collect(rows, {"N": np.asarray(list(Ns)), "fusion": fc.meta()})
 
 
 def sweep_over_snr(snr_dbs, make_model, make_bank, N, fc=None):
@@ -44,7 +44,7 @@ def sweep_over_snr(snr_dbs, make_model, make_bank, N, fc=None):
         row = _evaluate(point_fc, make_bank(model, N), model)
         row["chernoff_information"] = model.chernoff_information()
         rows.append(row)
-    return _collect(rows, {"snr_db": np.asarray(list(snr_dbs))})
+    return _collect(rows, {"snr_db": np.asarray(list(snr_dbs)), "fusion": point_fc.meta()})
 
 
 def sweep_over_R(model, make_bank, per_sensor_rate, Rs, fc=None, N_max=None):
@@ -66,7 +66,12 @@ def sweep_over_R(model, make_bank, per_sensor_rate, Rs, fc=None, N_max=None):
     if N_max is not None:
         Ns = np.minimum(Ns, N_max)
     rows = [_evaluate(fc, make_bank(int(N)), model) for N in Ns]
-    extra = {"R": np.asarray(list(Rs)), "N": Ns, "rate_used": Ns * per_sensor_rate}
+    extra = {
+        "R": np.asarray(list(Rs)),
+        "N": Ns,
+        "rate_used": Ns * per_sensor_rate,
+        "fusion": fc.meta(),
+    }
     return _collect(rows, extra)
 
 
@@ -74,4 +79,4 @@ def sweep_over_rate(model, make_bank, rates, fc=None):
     """make_bank(rate) -> EncoderBank. Sweeps total rate at a fixed scheme."""
     fc = FusionCenter(p=model.p) if fc is None else fc
     rows = [_evaluate(fc, make_bank(r), model) for r in rates]
-    return _collect(rows, {"rate": np.asarray(list(rates))})
+    return _collect(rows, {"rate": np.asarray(list(rates)), "fusion": fc.meta()})
