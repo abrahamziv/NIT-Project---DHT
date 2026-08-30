@@ -5,6 +5,7 @@ from ddms import (
     FusionCenter,
     GaussianShift,
     LRTEncoder,
+    RBitThresholdEncoder,
     SilenceEncoder,
     ThresholdEncoder,
 )
@@ -123,3 +124,72 @@ def test_from_fractions_counts_sum_to_n():
         counts[id(enc)] += 1
     assert counts[id(a)] + counts[id(b)] == 10
     assert counts[id(a)] in (3, 4)
+
+
+def test_rbit_encoder_cell_probs_are_a_pmf():
+    model = GaussianShift.from_snr_db(0.0)
+    for R, delta in ((1, 0.0), (1, 0.6), (3, 0.0), (3, 0.2)):
+        enc = RBitThresholdEncoder(model, R, 0.5, delta)
+        for j in (1, 2):
+            q = enc.cell_probs(model, j)
+            assert q.shape == (enc.M,)
+            assert np.all(q >= 0)
+            np.testing.assert_allclose(q.sum(), 1.0, rtol=1e-12)
+
+
+def test_rbit_encoder_mirror_symmetry():
+    # DDMS eq. mirror-probs: P(u^m | H1) = P(u^{L+1-m} | H2), silence in the
+    # middle hypothesis-independent (eq. silence-prob).
+    model = GaussianShift.from_snr_db(0.0)
+    for R in (1, 2, 3):
+        enc = RBitThresholdEncoder(model, R, 0.4, 0.3)
+        q1 = enc.cell_probs(model, 1)
+        q2 = enc.cell_probs(model, 2)
+        np.testing.assert_allclose(q1, q2[::-1], rtol=1e-12)
+
+
+def test_rbit_encoder_silence_prob_closed_form():
+    # DDMS eq. silence-prob: P(u^S) = Q(s/2 - delta/sigma) - Q(s/2 + delta/sigma)
+    from scipy.stats import norm
+
+    model = GaussianShift.from_snr_db(0.0)
+    s = model.mu / model.sigma
+    delta = 0.3
+    for R in (1, 2, 4):
+        enc = RBitThresholdEncoder(model, R, 0.4, delta)
+        expected = norm.sf(s / 2 - delta / model.sigma) - norm.sf(s / 2 + delta / model.sigma)
+        for j in (1, 2):
+            q = enc.cell_probs(model, j)
+            np.testing.assert_allclose(q[enc.L // 2], expected, rtol=1e-12)
+
+
+def test_rbit_encoder_delta_zero_is_vanilla():
+    # delta = 0: t_{L/2} = t_{L/2+1} = mu/2 degenerate, so M = L, nothing is
+    # silent, and the encoder equals a plain ThresholdEncoder on the same
+    # thresholds. rate() = R in both branches.
+    model = GaussianShift.from_snr_db(0.0)
+    for R in (1, 2, 3):
+        enc = RBitThresholdEncoder(model, R, 0.5, 0.0)
+        assert enc.M == enc.L == 2**R
+        assert enc.silent_indices == ()
+        assert enc.rate() == float(R)
+        assert enc.mean_rate(model) == float(R)
+        plain = ThresholdEncoder(enc.thresholds)
+        for j in (1, 2):
+            np.testing.assert_allclose(
+                enc.cell_probs(model, j), plain.cell_probs(model, j), rtol=1e-12
+            )
+    silent = RBitThresholdEncoder(model, 2, 0.5, 0.3)
+    assert silent.M == silent.L + 1
+    assert silent.rate() == 2.0
+    assert silent.mean_rate(model) < 2.0
+
+
+def test_rbit_encoder_histogram_matches_cell_probs():
+    model = GaussianShift.from_snr_db(0.0)
+    enc = RBitThresholdEncoder(model, 2, 0.6, 0.25)
+    rng = np.random.default_rng(11)
+    for j in (1, 2):
+        _, l = model.sample(j, 200_000, rng)
+        freq = np.bincount(enc.encode(l), minlength=enc.M) / l.size
+        np.testing.assert_allclose(freq, enc.cell_probs(model, j), atol=0.01)

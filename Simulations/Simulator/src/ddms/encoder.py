@@ -115,6 +115,56 @@ class SilenceEncoder(ThresholdEncoder):
         return f"SilenceEncoder(t={self.thresholds.tolist()}, silent={list(self.silent_indices)})"
 
 
+class RBitThresholdEncoder(SilenceEncoder):
+    """The DDMS section 5 policy gamma^R_{Delta,delta} (eq. general-thresholds).
+
+    L = 2^R regions of width Delta, L/2 per side of a silence bin of
+    half-width delta centered on mu/2. Thresholds are built in y-space,
+
+        t_j = mu/2 - delta - (L/2 - j) Delta,      j = 1, ..., L/2
+        t_j = mu/2 + delta + (j - L/2 - 1) Delta,  j = L/2+1, ..., L
+
+    then mapped to likelihood-ratio space (L(y) is increasing) for the
+    ThresholdEncoder machinery. At delta = 0 the silence bin degenerates to a
+    point: t_{L/2} = t_{L/2+1} = mu/2, only the L-1 distinct thresholds are
+    kept, and no symbol is silent -- this is gamma^V. At delta > 0 the middle
+    bin (index L/2) is silent -- gamma^S.
+    """
+
+    def __init__(self, model, R, Delta, delta=0.0):
+        if delta < 0:
+            raise ValueError("delta must be >= 0")
+        L = 2**R
+        if L >= 4 and Delta <= 0:
+            raise ValueError("Delta must be > 0 for R >= 2")
+        mu = model.mu
+        j = np.arange(1, L + 1)
+        y = np.where(
+            j <= L // 2,
+            mu / 2 - delta - (L // 2 - j) * Delta,
+            mu / 2 + delta + (j - L // 2 - 1) * Delta,
+        )
+        if delta == 0.0:
+            y = np.delete(y, L // 2)  # t_{L/2} == t_{L/2+1}: drop the duplicate
+            silent = ()
+        else:
+            silent = (L // 2,)
+        super().__init__(model.likelihood_ratio(y), silent)
+        self.R = int(R)
+        self.L = L
+        self.Delta = float(Delta)
+        self.delta = float(delta)
+        self.y_thresholds = y
+
+    def rate(self):
+        # R bits identify the L active regions; the base log2(M) would
+        # overstate this as log2(L+1) whenever the silence symbol exists.
+        return float(self.R)
+
+    def describe(self):
+        return f"RBitThresholdEncoder(R={self.R}, Delta={self.Delta:g}, delta={self.delta:g})"
+
+
 class EncoderBank:
     """The profile gamma^{1:N}: a list of encoders, possibly with different M."""
 
