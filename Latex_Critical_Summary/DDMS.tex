@@ -334,20 +334,25 @@ Every quantity below is written in terms of $a_j,c_j$ and applies to
 $\gamma^V$ and $\gamma^S$ alike.
  
 \subsubsection*{Symbol Probabilities}
- 
-Since $L(y)$ is increasing in $y$ (Appendix 6.2), each region's
-probability under the Gaussian model is a difference of $Q$-functions:
+
+Since $L(y)$ is increasing in $y$ (Appendix~\ref{app:vanilla-derivation}),
+each region's probability under the Gaussian model is a difference of
+$Q$-functions. For the left-hand symbols $m = 1,\dots,L/2$,
 \begin{align}
-P^{\gamma^R_{\Delta,\delta}}(u^m\mid H_1) &= Q(a_{m-1}) - Q(a_m),
-& P^{\gamma^R_{\Delta,\delta}}(u^m\mid H_2) &= Q(c_{m-1}) - Q(c_m),
-& & m=1,\dots,\tfrac{L}{2},
-\label{eq:prob-left}\\
-P^{\gamma^R_{\Delta,\delta}}(u^S\mid H_1) &= Q(a_{L/2}) - Q(a_{L/2+1}),
-& P^{\gamma^R_{\Delta,\delta}}(u^S\mid H_2) &= Q(c_{L/2}) - Q(c_{L/2+1}), & &
-\label{eq:prob-silence}\\
-P^{\gamma^R_{\Delta,\delta}}(u^m\mid H_1) &= Q(a_m) - Q(a_{m+1}),
-& P^{\gamma^R_{\Delta,\delta}}(u^m\mid H_2) &= Q(c_m) - Q(c_{m+1}),
-& & m=\tfrac{L}{2}+1,\dots,L.
+P^{\gamma^R_{\Delta,\delta}}(u^m\mid H_1) &= Q(a_{m-1}) - Q(a_m), &
+P^{\gamma^R_{\Delta,\delta}}(u^m\mid H_2) &= Q(c_{m-1}) - Q(c_m),
+\label{eq:prob-left}
+\end{align}
+for the silence symbol,
+\begin{align}
+P^{\gamma^R_{\Delta,\delta}}(u^S\mid H_1) &= Q(a_{L/2}) - Q(a_{L/2+1}), &
+P^{\gamma^R_{\Delta,\delta}}(u^S\mid H_2) &= Q(c_{L/2}) - Q(c_{L/2+1}),
+\label{eq:prob-silence}
+\end{align}
+and for the right-hand symbols $m = L/2+1,\dots,L$,
+\begin{align}
+P^{\gamma^R_{\Delta,\delta}}(u^m\mid H_1) &= Q(a_m) - Q(a_{m+1}), &
+P^{\gamma^R_{\Delta,\delta}}(u^m\mid H_2) &= Q(c_m) - Q(c_{m+1}).
 \label{eq:prob-right}
 \end{align}
  
@@ -399,14 +404,14 @@ $M(\cdot;R,\Delta,\delta)$ is convex on $[0,1]$; symmetry about
 $\alpha=0.5$ then places its minimum there, as in Equations (27) and (29).
  
 \subsubsection*{Closed-Form Bound}
- 
-\begin{equation}
-C(R,\Delta,\delta) \triangleq -\log M(0.5; R,\Delta,\delta)
-= -\log\left[P^{\gamma^R_{\Delta,\delta}}(u^S)
+
+\begin{align}
+C(R,\Delta,\delta) &\triangleq -\log M(0.5; R,\Delta,\delta) \nonumber \\
+&= -\log\left[P^{\gamma^R_{\Delta,\delta}}(u^S)
 + \sum_{m=1}^{L} \sqrt{P^{\gamma^R_{\Delta,\delta}}(u^m\mid H_1)\,
 P^{\gamma^R_{\Delta,\delta}}(u^m\mid H_2)}\right],
 \label{eq:general-closed-form}
-\end{equation}
+\end{align}
 \begin{equation}
 \lim_{N\to\infty} J_{EE}^N(\gamma^{0:N}) \ge C(R,\Delta,\delta).
 \label{eq:general-closed-form-bound}
@@ -424,6 +429,129 @@ $\Delta$, and \eqref{eq:general-closed-form} reduces to Equation (28) at
 $\delta=0$ and to Equation (30) at $\delta>0$, recovering the one-bit
 case exactly.
 
+\subsubsection*{The Unquantized Ceiling}
+
+Before evaluating the bound it is worth fixing what it is bounded by.
+Suppose the sensor forwards $y^i$ itself, at infinite precision. Under the
+Gaussian model
+\begin{equation}
+M_\infty(\alpha) \triangleq \int f_{y|H_2}^{1-\alpha}(y)\,f_{y|H_1}^{\alpha}(y)\,dy
+= \exp\!\Big(-\alpha(1-\alpha)\tfrac{\mu^2}{2\sigma^2}\Big),
+\label{eq:M-infty}
+\end{equation}
+which is again symmetric about $\alpha=1/2$ and convex, so the minimum sits
+there as in Equation~\eqref{eq:general-closed-form}, giving
+\begin{equation}
+C_\infty \triangleq -\min_{\alpha\in[0,1]}\log M_\infty(\alpha)
+= \frac{\mu^2}{8\sigma^2} = \frac{s^2}{8}.
+\label{eq:ceiling}
+\end{equation}
+Since $H \to y^i \to u^i$ is Markov for any policy, the Data Processing
+Inequality of Section~\ref{sec:sufficient-statistic} applies to $\gamma$ as
+it did to $l^i$: quantization can discard evidence about $H$, never create
+it. Hence
+\begin{equation}
+C(R,\Delta,\delta) \le C_\infty \qquad \text{for every } R,\Delta,\delta,
+\label{eq:ceiling-bound}
+\end{equation}
+and $C_\infty$ is the natural yardstick against which every finite-rate
+policy is measured. Note that $C_\infty$ depends on the model only through
+$s = \mu/\sigma$: the whole problem is how many standard deviations apart
+the two hypotheses sit.
+
+\subsubsection*{Transmitted Rate}
+
+The parameter $R$ is the rate $\gamma^V$ pays, but not the rate $\gamma^S$
+pays: a silent sensor sends nothing. Using
+Equation~\eqref{eq:silence-prob}, the expected transmitted rate is
+\begin{equation}
+\bar R(R,\Delta,\delta) \triangleq R\,\Big(1 - P^{\gamma^R_{\Delta,\delta}}(u^S)\Big),
+\label{eq:mean-rate}
+\end{equation}
+so $\bar R = R$ for $\gamma^V$ and $\bar R < R$ for $\gamma^S$. Comparisons
+made at equal $R$ therefore charge $\gamma^S$ for bandwidth it never uses.
+
+\subsection*{Simulation Results}
+\label{sec:sim-results}
+
+We evaluate $\gamma^R_{\Delta,\delta}$ for $R = 1,\dots,5$ at
+$N = 3000$ sensors and $p = \tfrac12$, at three operating points
+$\mathrm{SNR} \in \{-5, 0, +5\}$~dB. At each point $(\Delta^\star,
+\delta^\star)$ are chosen to maximize the closed-form bound
+$C(R,\Delta,\delta)$ of Equation~\eqref{eq:general-closed-form}; Setup A
+pins $\delta = 0$, so $\gamma^V$ optimizes over $\Delta$ alone. The
+fusion center computes $J^N$ exactly, from which $J^N_{EE}$ follows by
+Equation~\eqref{eq:error-exponent-def}.
+
+% TODO: regenerate these three panels with the C_infty ceiling line and the
+% C(R, Delta*, delta*) bound curves overlaid (Figs/fig_JEE_vs_R_N3000_*.png).
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.32\textwidth]{Figs/fig_JEE_vs_R_N3000_snrm5.png}
+    \includegraphics[width=0.32\textwidth]{Figs/fig_JEE_vs_R_N3000_snrp0.png}
+    \includegraphics[width=0.32\textwidth]{Figs/fig_JEE_vs_R_N3000_snrp5.png}
+    \caption{Normalized error exponent $J^N_{EE}$ against $R$ at the optimal
+    $(\Delta^\star,\delta^\star)$, for $N = 3000$ and
+    $\mathrm{SNR} = -5, 0, +5$~dB (left to right). Setup A is
+    $\gamma^V$, Setup B is $\gamma^S$.}
+    \label{fig:jee-vs-R}
+\end{figure}
+
+Figure~\ref{fig:jee-vs-R} shows one shape repeated at all three operating
+points. $J^N_{EE}$ rises monotonically in $R$ and saturates onto the
+unquantized ceiling $C_\infty$ of Equation~\eqref{eq:ceiling}, as
+Equation~\eqref{eq:ceiling-bound} requires. Saturation is fast: a single
+bit already recovers roughly $63\%$ of $C_\infty$ under $\gamma^V$ and
+$81\%$ under $\gamma^S$, and by $R = 3$ both policies sit within a few
+percent of the ceiling. The entire design question therefore lives at
+$R \le 3$; past that the extra bits buy nothing.
+
+The silence policy dominates the vanilla one at every $R$, as
+$C_S > C_V$ predicts, but the whole of that advantage is concentrated at
+low rate. It is largest at $R = 1$ and by $R = 4$ the two curves are
+indistinguishable. The optimized geometry explains why. Table~\ref{tab:opt-params}
+lists $(\Delta^\star,\delta^\star)$ against $R$: the cell width
+$\Delta^\star$ decays geometrically, by a factor of roughly $0.55$ per added
+bit, while the ratio $\delta^\star/\Delta^\star$ stays close to $0.4$
+throughout. The silence bin holds an essentially fixed fraction of a cell,
+so it shrinks with the cell; by Equation~\eqref{eq:silence-prob} the
+silence probability vanishes with it, and $\gamma^S$ degenerates
+continuously into $\gamma^V$. The two effects visible at the knee of
+Figure~\ref{fig:jee-vs-R} -- silence ceasing to help, and quantization
+ceasing to cost -- are the same phenomenon, $\Delta^\star \to 0$, seen from
+two sides.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{l|cccccc}
+\hline
+$R$ & 2 & 3 & 4 & 5 & 6 & 7 \\
+\hline
+$\Delta^\star$ & 0.988 & 0.567 & 0.321 & 0.179 & 0.099 & 0.054 \\
+$\delta^\star$ & 0.384 & 0.224 & 0.127 & 0.070 & 0.038 & 0.021 \\
+$\delta^\star/\Delta^\star$ & 0.443 & 0.424 & 0.409 & 0.396 & 0.387 & 0.379 \\
+$\Delta^\star(R)/\Delta^\star(R-1)$ & -- & 0.574 & 0.566 & 0.560 & 0.554 & 0.548 \\
+\hline
+\end{tabular}
+\caption{Optimal ladder parameters against $R$, in units of $\sigma$, at
+$\mathrm{SNR} = 0$~dB. Obtained by maximizing $C(R,\Delta,\delta)$
+directly, so no simulation is involved and the range extends past the
+swept $R \le 5$. At $R = 1$ the single pair of thresholds is
+$\mu/2 \mp \delta$ and $\Delta$ is inert.}
+\label{tab:opt-params}
+\end{table}
+
+Across the three panels only the vertical scale changes: normalized by
+$C_\infty$ the curves coincide to under one percent, and
+$(\Delta^\star,\delta^\star)$ in units of $\sigma$ barely move. This is
+Equation~\eqref{eq:ceiling} showing through -- the model enters only
+through $s$, which $C_\infty$ absorbs. SNR sets the achievable exponent;
+$R$ sets what fraction of it is achieved.
+
+Both policies are charged the nominal $R$, which by
+Equation~\eqref{eq:mean-rate} overstates what $\gamma^S$ sends: at $R = 1$
+and $0$~dB it transmits $\bar R \approx 0.59$ bits per sensor, below the
+one bit $\gamma^V$ must spend.
 
 % \subsection*{Setup A - Vanilla}
 % By Lemma 1, the optimal decision rule is a threshold on the likelihood ratio $L(y)$. Under the Gaussian model and the MAP-optimal choice $\tau=1$, this reduces to a threshold directly on $y$ at $\lambda_V = \frac{\mu}{2}$ (full derivation in Appendix~\ref{app:vanilla-derivation}), giving the regions:
