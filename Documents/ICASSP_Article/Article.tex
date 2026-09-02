@@ -4,16 +4,17 @@
 \usepackage{bm}
 \usepackage{cite}
 \usepackage{graphicx}
+\usepackage{float}
 
 \newcommand{\Qfun}{Q}
 
 \title{Rate-Aware Decentralized Detection with Many Sensors}
 
 \author{%
-\IEEEauthorblockN{Oren Ram and Ziv Abraham}
-\IEEEauthorblockA{Department / Institution\\
-City, Country\\
-Email addresses}}
+\IEEEauthorblockN{Oren Ram and Ziv Abraham}}
+% \IEEEauthorblockA{Department / Institution\\
+% City, Country\\
+% Email addresses}}
 
 \begin{document}
 \maketitle
@@ -266,6 +267,27 @@ At a given rate the design problem is to place the ladder,
 with $\gamma^A$ obtained by pinning $\delta=0$ and optimizing over $\Delta$
 alone.  For $R>1$ this admits no closed form, and we solve it numerically.
 
+\begin{table}[t]
+\centering
+\caption{Optimal ladder parameters of $\gamma^S$ against $R$, in units of
+$\sigma$, at $\mathrm{SNR}=0$~dB.  Obtained by maximizing
+$C(R,\Delta,\delta)$ directly, so no simulation is involved and the range
+extends past the swept $R\le5$.  At $R=1$ the single pair of thresholds is
+$\mu/2\mp\delta$ and $\Delta$ is inert.}
+\label{tab:opt-params}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{l|cccccc}
+\hline
+$R$ & 2 & 3 & 4 & 5 & 6 & 7\\
+\hline
+$\Delta^\star$ & 0.867 & 0.529 & 0.310 & 0.176 & 0.099 & 0.054\\
+$\delta^\star$ & 0.384 & 0.224 & 0.127 & 0.070 & 0.038 & 0.021\\
+$\delta^\star/\Delta^\star$ & 0.443 & 0.424 & 0.409 & 0.396 & 0.387 & 0.379\\
+$\Delta^\star(R)/\Delta^\star(R{-}1)$ & -- & 0.610 & 0.585 & 0.570 & 0.559 & 0.551\\
+\hline
+\end{tabular}
+\end{table}
+
 \section{Numerical Results}
 \label{sec:numerical}
 We evaluate the ladder for $R=1,\dots,5$ at $N=3000$ sensors
@@ -316,28 +338,7 @@ Figure~\ref{fig:jee-vs-R} -- silence ceasing to help, and quantization
 ceasing to cost -- are the same phenomenon, $\Delta^\star\to0$, seen from
 two sides.
 
-\begin{table}[t]
-\centering
-\caption{Optimal ladder parameters of $\gamma^S$ against $R$, in units of
-$\sigma$, at $\mathrm{SNR}=0$~dB.  Obtained by maximizing
-$C(R,\Delta,\delta)$ directly, so no simulation is involved and the range
-extends past the swept $R\le5$.  At $R=1$ the single pair of thresholds is
-$\mu/2\mp\delta$ and $\Delta$ is inert.}
-\label{tab:opt-params}
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{l|cccccc}
-\hline
-$R$ & 2 & 3 & 4 & 5 & 6 & 7\\
-\hline
-$\Delta^\star$ & 0.867 & 0.529 & 0.310 & 0.176 & 0.099 & 0.054\\
-$\delta^\star$ & 0.384 & 0.224 & 0.127 & 0.070 & 0.038 & 0.021\\
-$\delta^\star/\Delta^\star$ & 0.443 & 0.424 & 0.409 & 0.396 & 0.387 & 0.379\\
-$\Delta^\star(R)/\Delta^\star(R{-}1)$ & -- & 0.610 & 0.585 & 0.570 & 0.559 & 0.551\\
-\hline
-\end{tabular}
-\end{table}
-
-\begin{figure}[t]
+\begin{figure}[H]
  \centering
  \includegraphics[width=\linewidth]{Figs/fig_icassp_JEE_vs_R_N3000_snrm5.png}
  \caption{As Figure~\ref{fig:jee-vs-R}, at $\mathrm{SNR}=-5$~dB, where
@@ -345,7 +346,7 @@ $\Delta^\star(R)/\Delta^\star(R{-}1)$ & -- & 0.610 & 0.585 & 0.570 & 0.559 & 0.5
  \label{fig:jee-m5}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[H]
  \centering
  \includegraphics[width=\linewidth]{Figs/fig_icassp_JEE_vs_R_N3000_snrp5.png}
  \caption{As Figure~\ref{fig:jee-vs-R}, at $\mathrm{SNR}=+5$~dB, where
