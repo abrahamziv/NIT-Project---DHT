@@ -30,29 +30,22 @@ decentralized detection, sensor networks, error exponent, Chernoff information, 
 \textit{[Introduction placeholder.]}
 
 \section{Problem Formulation}
-Consider binary hypotheses $H_1$ and $H_2$ with priors
-$P(H_1)=p$ and $P(H_2)=1-p$.  Sensor $i\in\{1,\ldots,N\}$
+Consider binary hypotheses $H_1$ and $H_2$, and let
+$H^\star\in\{1,2\}$ index the true one, with priors $P(H^\star=1)=p$ and
+$P(H^\star=2)=1-p$.  Sensor $i\in\{1,\ldots,N\}$
 observes $y^i\in\mathcal{Y}$ and applies an encoder
 $\gamma^i:\mathcal{Y}\to\mathcal{U}$.  Its message
 $u^i=\gamma^i(y^i)$ is available to a fusion center (FC), which uses
 $\gamma^0:\mathcal{U}^N\to\{1,2\}$ to produce the final decision
 $u^0=\gamma^0(u^{1:N})$.
 
-Under uniform error cost,
+Under uniform error cost the Bayes risk is the probability of error,
 \begin{equation}
- c(H_j,u^0)=
- \begin{cases}
-  1 & \text{if } u^0 \neq j\\
-  0 & \text{if } u^0 = j
- \end{cases}
- \label{eq:cost}
-\end{equation}
-\begin{equation}
- J^N(\gamma^{0:N}) \triangleq \mathbb{E}^{\gamma^{0:N}}[c(H^\star,u^0)].
+ J^N(\gamma^{0:N}) \triangleq
+ \mathbb{P}^{\gamma^{0:N}}\big(u^0\neq H^\star\big) = P_e
  \label{eq:bayes-risk}
 \end{equation}
-Thus, $J^N=P_e$ is the Bayes probability of error.  We use the
-positive normalized error exponent
+We use the positive normalized error exponent
 \begin{equation}
  J^N_{EE}(\gamma^{0:N}) \triangleq -\frac{1}{N}\log J^N(\gamma^{0:N}),
  \label{eq:error-exponent}
@@ -69,11 +62,10 @@ The analysis uses the following assumptions.
  measure.
  \item All sensors have the same finite message alphabet $\mathcal{U}$.
  \item The likelihood ratio
- \begin{equation}
+ \begin{equation*}
   L(y):=\frac{f_{y|H}(y|H_2)}
   {f_{y|H}(y|H_1)}
-  \label{eq:lr}
- \end{equation}
+ \end{equation*}
  is regular enough that threshold encoders are well defined; in
  particular, its derivative is continuous and nonsingular almost
  surely on the observation space.
@@ -91,7 +83,7 @@ asymptotically optimal for large finite populations.
 \subsection{MAP fusion rule}
 For fixed deterministic encoders, define
 \begin{equation}
- \Delta_N(u^{1:N};\gamma^{1:N}) \triangleq \frac{1}{N}\sum_{i=1}^{N}
+ \Delta_N \triangleq \frac{1}{N}\sum_{i=1}^{N}
  \log\frac{P^{\gamma^i}(u^i|H_1)}
  {P^{\gamma^i}(u^i|H_2)}
  \label{eq:delta}
@@ -100,8 +92,8 @@ The MAP rule is
 \begin{equation}
  \gamma^{0\star}(u^{1:N})=
  \begin{cases}
-  H_1 & \text{if } \Delta_N(u^{1:N};\gamma^{1:N})\ge t\\
-  H_2 & \text{if } \Delta_N(u^{1:N};\gamma^{1:N})<t
+  H_1 & \text{if } \Delta_N\ge t\\
+  H_2 & \text{if } \Delta_N<t
  \end{cases}
  \quad
  t=\frac{1}{N}\log\frac{1-p}{p}
@@ -124,29 +116,20 @@ Applying Chernoff bounds to the two MAP error events gives
  \prod_{i=1}^{N}M(\alpha,\gamma^i)
  \label{eq:pe-bound}
 \end{equation}
-Suppose that the sensors use $K$ distinct policies and that a fraction
-$c_k$ uses policy $\gamma^k$, where $c_k\ge0$ and
-$\sum_{k=1}^{K}c_k=1$.  From \eqref{eq:pe-bound},
+When every sensor uses the same policy $\gamma$, taking
+$-\tfrac{1}{N}\log(\cdot)$ of \eqref{eq:pe-bound} and letting
+$N\to\infty$ leaves the Chernoff information between the two induced
+message distributions,
 \begin{equation}
  \liminf_{N\to\infty}J^N_{EE}(\gamma^{0:N})
- \ge -\min_{\alpha\in[0,1]}
- \sum_{k=1}^{K}c_k\log M(\alpha,\gamma^k)
- \label{eq:mixed-exponent}
-\end{equation}
-For an identical policy $\gamma$, this becomes the Chernoff information
-between the two induced message distributions:
-\begin{equation}
- C_\gamma=-\min_{\alpha\in[0,1]}\log
- \left(\sum_{u\in\mathcal{U}}
- P^{\gamma}(u|H_2)^{1-\alpha}
- P^{\gamma}(u|H_1)^{\alpha}\right)
- \label{eq:chernoff-information}
+ \ge -\min_{\alpha\in[0,1]}\log M(\alpha,\gamma)
+ \label{eq:identical-exponent}
 \end{equation}
 The structural result in \cite{Sanjari2025} therefore reduces the
-large-network design to selecting one encoder that maximizes
-$C_\gamma$, subject here to a communication-rate constraint.
+large-network design to selecting one encoder that maximizes this
+exponent, subject here to a communication-rate constraint.
 
-\section{Rate-Aware Gaussian Policies}
+\section{Rate-Aware $R$-Bit Threshold Policies}
 Assume
 \begin{equation}
  y^i|H_1\sim\mathcal{N}(0,\sigma^2),\qquad
@@ -158,165 +141,245 @@ with $\mu>0$.  Then
  \log L(y)=\frac{\mu y}{\sigma^2}-\frac{\mu^2}{2\sigma^2}
  \label{eq:gaussian-llr}
 \end{equation}
-We compare an always-transmit binary policy with a confidence-based policy that can remain silent, allocating one bit per sensor.
-\subsection{Always-transmit policy}
-For the symmetric threshold $\lambda_V=\mu/2$, let $u^1$ be
-sent below the threshold and $u^2$ otherwise.  With
-$q=\Qfun(\mu/(2\sigma))$, the induced probabilities are
-\begin{align}
- P(u^1|H_1)&=P(u^2|H_2)=1-q,\nonumber\\
- P(u^2|H_1)&=P(u^1|H_2)=q
- \label{eq:vanilla-probabilities}
-\end{align}
-The Chernoff coefficient is symmetric about $\alpha=1/2$, and hence
-\begin{equation}
- C_V=-\log\left(2\sqrt{q(1-q)}\right)
- \label{eq:vanilla-exponent}
-\end{equation}
-Every sensor transmits one bit, so the total rate is
-$R_V=N$ bits per observation interval.
+We generalize the always-transmit policy and the confidence-based silent
+policy into a single family of threshold policies, indexed by the number of
+bits $R$, a bin width $\Delta>0$, and a silence half-width $\delta\ge0$.
 
-\subsection{Silent policy}
-Introduce a no-transmission symbol $u^S$ and symmetric
-thresholds
+\subsection{The $R$-bit ladder}
+Let $L\triangleq2^R$ and $\mathcal{U}=\{u^1,\dots,u^L,u^S\}$, where $u^S$
+denotes silence.  For $\delta\ge0$, define the thresholds
 \begin{equation}
- \lambda_1=\frac{\mu}{2}-\delta,\qquad
- \lambda_2=\frac{\mu}{2}+\delta,
- \quad \delta>0.
- \label{eq:silent-thresholds}
+ t_j(\delta)\triangleq
+ \begin{cases}
+  \dfrac{\mu}{2}-\delta-\Big(\dfrac{L}{2}-j\Big)\Delta,
+    & j=1,\dots,\dfrac{L}{2}\\[2mm]
+  \dfrac{\mu}{2}+\delta+\Big(j-\dfrac{L}{2}-1\Big)\Delta,
+    & j=\dfrac{L}{2}+1,\dots,L
+ \end{cases}
+ \label{eq:general-thresholds}
 \end{equation}
-The sensor sends $u^1$ for $y<\lambda_1$, remains silent for
-$\lambda_1\le y\le\lambda_2$, and sends $u^2$ for
-$y>\lambda_2$.  Define
-\begin{equation}
- q_+=\Qfun\!\left(\frac{\mu/2+\delta}{\sigma}\right),\qquad
- q_-=\Qfun\!\left(\frac{\mu/2-\delta}{\sigma}\right)
- \label{eq:qpm}
-\end{equation}
-The message probabilities are
-\begin{align}
- (P(u^1|H_1),P(u^S|H_1),P(u^2|H_1))
-   &=(1-q_-,q_--q_+,q_+),\nonumber\\
- (P(u^1|H_2),P(u^S|H_2),P(u^2|H_2))
-   &=(q_+,q_--q_+,1-q_-)
- \label{eq:silent-probabilities}
-\end{align}
-Again, symmetry gives the minimizing Chernoff parameter
-$\alpha=1/2$, so
-\begin{equation}
- C_S(\delta)=-\log\left(
- q_--q_+ +2\sqrt{(1-q_-)q_+}\right)
- \label{eq:silent-exponent}
-\end{equation}
-The probability of transmission is
-$\rho(\delta)=1-q_-+q_+$ under either hypothesis.  If an active sensor
-sends one bit and silence is detected at no bit cost, then
-\begin{equation}
- R_S(\delta)=N\rho(\delta)
- \label{eq:silent-rate}
-\end{equation}
-is the expected total rate.  Equations \eqref{eq:silent-exponent} and
-\eqref{eq:silent-rate} expose the detection--communication tradeoff;
-$\delta$ can be selected by
-\begin{equation}
- \max_{\delta>0}\ C_S(\delta)
- \quad\text{subject to}\quad R_S(\delta)\le R_{\max}
- \label{eq:rate-optimization}
-\end{equation}
+with $t_0\triangleq-\infty$ and $t_{L+1}\triangleq+\infty$, so the
+thresholds cut the line into $L+1$ intervals $(t_{j-1},t_j)$,
+$j=1,\dots,L+1$.  The sensor sends $u^j$ from the $j$-th interval for
+$j\le L/2$, stays silent on the central one, $j=L/2+1$, and sends
+$u^{j-1}$ for $j\ge L/2+2$.
 
-\section{Optimal Silence Threshold}
-\label{sec:optimal-delta}
-At $\alpha=1/2$, maximizing $C_S(\delta)$ in \eqref{eq:silent-exponent}
-is equivalent to minimizing
-\begin{equation}
- M_S(\delta) = (q_- - q_+) + 2\sqrt{(1-q_-)q_+}
- \label{eq:ms-of-delta}
-\end{equation}
-Writing $\phi_\pm \triangleq \phi\big((\mu/2\pm\delta)/\sigma\big)$ for
-the standard normal density, $A\triangleq\sqrt{q_+}$, and
-$B\triangleq\sqrt{1-q_-}$, differentiating \eqref{eq:ms-of-delta} with
-respect to $\delta$ gives
-\begin{align}
- \sigma\frac{dM_S}{d\delta}
- = \frac{(B-A)(\phi_-A-\phi_+B)}{AB}
- \label{eq:dms}
-\end{align}
-Since $B>A$ for all $\delta>0$ (because
-$B^2=\Qfun((\delta-\mu/2)/\sigma) > \Qfun((\delta+\mu/2)/\sigma)=A^2$),
-the sign of $dM_S/d\delta$ is carried entirely by $\phi_-A-\phi_+B$, so
-any stationary point of $M_S$ satisfies
-\begin{equation}
- \frac{\phi_-}{\phi_+} = \frac{B}{A}
- \iff
- e^{\mu\delta/\sigma^2} = \sqrt{\frac{1-q_-}{q_+}}
- \label{eq:opt-delta-cond}
-\end{equation}
-Since $\delta=(\sigma^2/\mu)\log\tau_2$ maps the silence half-width
-back to the upper likelihood-ratio threshold, the left-hand side of
-\eqref{eq:opt-delta-cond} is exactly $\tau_2$, giving the optimal
-silence threshold in closed form:
-\begin{equation}
- \tau_2^{\star\,2}
- = \frac{P^{\gamma^S}(u^2|H_2)}{P^{\gamma^S}(u^2|H_1)}
- = \frac{P^{\gamma^S}(u^1|H_1)}{P^{\gamma^S}(u^1|H_2)}
- \label{eq:opt-tau}
-\end{equation}
-Equation~\eqref{eq:opt-tau} reduces the single-parameter search over
-$\delta$ in \eqref{eq:rate-optimization} to evaluating a closed-form
-condition instead of a numerical line search.
+At $\delta=0$ the two central thresholds coincide at $\mu/2$: the silence
+interval degenerates to a point, $u^S$ is never sent, and what remains is
+an $L$-region always-transmit policy.  We write $\gamma^A$ for the policy
+at $\delta=0$, and $\gamma^S$ for the policy at $\delta>0$.
 
-\section{Numerical Evaluation}
+\subsection{Symbol probabilities}
+Standardizing by $\sigma$, write
+\begin{equation*}
+ a_j\triangleq\frac{t_j(\delta)}{\sigma},\qquad
+ s\triangleq\frac{\mu}{\sigma},
+\end{equation*}
+with $a_0\triangleq-\infty$ and $a_{L+1}\triangleq+\infty$.  Since
+$\log L(y)$ in \eqref{eq:gaussian-llr} is increasing in $y$, every
+decision region is an interval and its probability is a difference of
+$Q$-functions,
+\begin{align*}
+ P(t_{j-1}<y<t_j\mid H_1)&=\Qfun(a_{j-1})-\Qfun(a_j),\\
+ P(t_{j-1}<y<t_j\mid H_2)&=\Qfun(a_{j-1}-s)-\Qfun(a_j-s)
+\end{align*}
+Every quantity below is written in terms of $a_j$ and $s$, and applies to
+$\gamma^A$ and $\gamma^S$ alike.
+
+\subsection{Symmetry and the closed-form bound}
+The thresholds \eqref{eq:general-thresholds} mirror about $\mu/2$, that is
+$t_{L+1-j}(\delta)=\mu-t_j(\delta)$, and the two densities mirror with them,
+$f_{y|H}(y|H_1)=f_{y|H}(\mu-y|H_2)$.  The message probabilities are
+therefore exchanged by the mirror, $P(u^m|H_1)=P(u^{L+1-m}|H_2)$, and the
+silence probability is hypothesis-independent,
+\begin{align}
+ P(u^S|H_1)=P(u^S|H_2)&\triangleq P(u^S)\nonumber\\
+ &=\Qfun\Big(\frac{s}{2}-\frac{\delta}{\sigma}\Big)
+ -\Qfun\Big(\frac{s}{2}+\frac{\delta}{\sigma}\Big)
+ \label{eq:silence-prob}
+\end{align}
+Generalizing \eqref{eq:chernoff-coefficient} to the $L+1$ symbols, the
+silence term collapses for every $\alpha$ by \eqref{eq:silence-prob}:
+\begin{equation*}
+ M(\alpha;R,\Delta,\delta)\triangleq P(u^S)
+ +\sum_{m=1}^{L}P(u^m|H_2)^{1-\alpha}P(u^m|H_1)^{\alpha}
+\end{equation*}
+The mirror relation gives $M(1-\alpha;\cdot)=M(\alpha;\cdot)$, and each
+summand is convex in $\alpha$, so $M$ is convex on $[0,1]$ and symmetric
+about $\alpha=1/2$: its minimum sits there.  With
+\eqref{eq:identical-exponent}, this gives the bound in closed form,
+\begin{align}
+ C(R,\Delta,\delta)&\triangleq-\log M(0.5;R,\Delta,\delta)\nonumber\\
+ &=-\log\Big[P(u^S)+\sum_{m=1}^{L}\sqrt{P(u^m|H_1)P(u^m|H_2)}\Big]
+ \label{eq:general-closed-form}
+\end{align}
+\begin{equation}
+ \liminf_{N\to\infty}J^N_{EE}(\gamma^{0:N})\ge C(R,\Delta,\delta)
+ \label{eq:general-closed-form-bound}
+\end{equation}
+At $\delta=0$ we have $P(u^S)=0$ and \eqref{eq:general-closed-form} reduces
+to the $L$-region always-transmit bound $C_A\triangleq C(R,\Delta,0)$; for
+$\delta>0$ we write $C_S\triangleq C(R,\Delta,\delta)$.
+
+\subsection{The unquantized ceiling}
+Before evaluating the bound it is worth fixing what it is bounded by.
+Suppose the sensor forwards $y^i$ itself, at infinite precision.  Under the
+Gaussian model \eqref{eq:gaussian-model} its Chernoff coefficient is
+$\exp\big(-\alpha(1-\alpha)s^2/2\big)$, again symmetric about
+$\alpha=1/2$ and convex, so its minimum sits there as in
+\eqref{eq:general-closed-form}, giving
+\begin{align}
+ C_\infty&\triangleq-\min_{\alpha\in[0,1]}\log\int
+ f_{y|H}^{1-\alpha}(y|H_2)\,f_{y|H}^{\alpha}(y|H_1)\,dy\nonumber\\
+ &=\frac{\mu^2}{8\sigma^2}=\frac{s^2}{8}
+ \label{eq:ceiling}
+\end{align}
+Since $H^\star\to y^i\to u^i$ is Markov for any policy, the data processing
+inequality gives $I(H^\star;u^i)\le I(H^\star;y^i)$: quantization can
+discard evidence about the hypothesis, never create it.  Hence
+\begin{equation}
+ C(R,\Delta,\delta)\le C_\infty\qquad\text{for every }R,\Delta,\delta,
+ \label{eq:ceiling-bound}
+\end{equation}
+and $C_\infty$ is the natural yardstick against which every finite-rate
+policy is measured.  Note that $C_\infty$ depends on the model only through
+$s=\mu/\sigma$: the whole problem is how many standard deviations apart the
+two hypotheses sit.
+
+\subsection{Transmitted rate and the design problem}
+The parameter $R$ is the rate $\gamma^A$ pays, but not the rate $\gamma^S$
+pays: a silent sensor sends nothing.  Using \eqref{eq:silence-prob}, the
+expected transmitted rate is
+\begin{equation}
+ \bar R\triangleq R\big(1-P(u^S)\big),
+ \label{eq:mean-rate}
+\end{equation}
+so $\bar R=R$ for $\gamma^A$ and $\bar R<R$ for $\gamma^S$.  Comparisons
+made at equal $R$ therefore charge $\gamma^S$ for bandwidth it never uses.
+
+At a given rate the design problem is to place the ladder,
+\begin{equation}
+ (\Delta^\star,\delta^\star)
+ =\arg\max_{\Delta>0,\ \delta\ge0}C(R,\Delta,\delta),
+ \label{eq:design-problem}
+\end{equation}
+with $\gamma^A$ obtained by pinning $\delta=0$ and optimizing over $\Delta$
+alone.  For $R>1$ this admits no closed form, and we solve it numerically.
+
+\section{Numerical Results}
 \label{sec:numerical}
-For the baseline experiment, use balanced priors and $0$ dB SNR:
-$p=1/2$ and $\mu=\sigma^2=1$. Then
-$q=\Qfun(0.5)\approx0.3085$ and
-\begin{equation}
- C_V\approx0.0793.
-\end{equation}
-Using the optimal thresholds from \eqref{eq:opt-tau},
-$\delta^\star\approx0.6170$, i.e. $\tau_1^\star\approx0.5395$,
-$\tau_2^\star\approx1.8534$, giving $q_+\approx0.1320$ and
-$q_-\approx0.5466$.  Hence
-\begin{equation}
- C_S\approx0.1011,\qquad
- \rho\approx0.5854.
- \label{eq:numerical-silent}
-\end{equation}
-This example predicts a larger asymptotic exponent while about
-$59\%$ of the sensors transmit.  A complete evaluation should compare
-finite-$N$ MAP error probabilities, the limits in
-\eqref{eq:vanilla-exponent} and \eqref{eq:silent-exponent}, and the
-rate--exponent curve obtained by varying $\delta$.
+We evaluate the ladder for $R=1,\dots,5$ at $N=3000$ sensors
+and $p=\tfrac12$, at three operating points
+$\mathrm{SNR}\in\{-5,0,+5\}$~dB.  At each point $(\Delta^\star,
+\delta^\star)$ solves \eqref{eq:design-problem}.  The fusion center computes
+$J^N$ exactly, from which $J^N_{EE}$ follows by \eqref{eq:error-exponent}.
 
-\section{Simulation}
-\label{sec:simulation}
-Figure~\ref{fig:active-senders-chernoff} plots the simulated normalized
-error exponent $J^N_{EE}$ against the number sensors, 
-for both the always-transmit and silent policies, alongside
-their respective Chernoff-information asymptotes $C_V$ and $C_S$
-computed in Section~\ref{sec:numerical}. Both curves decay from a
-large-$N$-mismatch regime and converge to their asymptote as the
-sensor count grows, confirming \eqref{eq:mixed-exponent} as the
-correct $N \to \infty$ limit; the silent policy's curve lies uniformly
-above the always-transmit one, consistent with $C_S > C_V$.
 \begin{figure}[t]
  \centering
- \includegraphics[width=0.9\linewidth]{Figs/fig_active_senders_normalized_chernoff copy 2.png}
- \caption{Normalized error exponent $J^N_{EE}$ vs. number of active
- senders, SNR $=0$~dB, for the always-transmit and silent policies at
- the optimal threshold $\tau_2^\star\approx1.8534$, with their
- Chernoff-information asymptotes $C_V \approx 0.0793$ and
- $C_S \approx 0.1011$ shown as dashed lines.}
- \label{fig:active-senders-chernoff}
+ \includegraphics[width=\linewidth]{Figs/fig_icassp_JEE_vs_R_N3000_snrp0.png}
+ \caption{Normalized error exponent $J^N_{EE}$ against $R$ at the optimal
+ $(\Delta^\star,\delta^\star)$, for $N=3000$ and $\mathrm{SNR}=0$~dB, with
+ the closed-form bounds of \eqref{eq:general-closed-form} (dotted) and the
+ unquantized ceiling $C_\infty=0.125$ of \eqref{eq:ceiling} (dashed).}
+ \label{fig:jee-vs-R}
 \end{figure}
 
+Figure~\ref{fig:jee-vs-R} shows the $0$~dB panel, and
+Figures~\ref{fig:jee-m5} and~\ref{fig:jee-p5} the other two operating
+points; one shape repeats at all three.  $J^N_{EE}$ rises monotonically in
+$R$ and approaches the unquantized ceiling $C_\infty$ of
+\eqref{eq:ceiling}.  It sits slightly above its own bound throughout -- by
+$0.0012$ to $0.0016$ across the three panels at $N=3000$, essentially flat
+in $R$ -- since $C$ bounds the $N\to\infty$ limit while the finite-$N$
+exponent still carries an $O(1/N)$ prefactor.  The same offset carries it a
+little past $C_\infty$ itself at high $R$, most visibly at $-5$~dB where the
+ceiling is smallest: \eqref{eq:ceiling-bound} constrains the limit, not the
+finite-$N$ exponent.
+
+Saturation is fast: a single bit already recovers $63\%$ of $C_\infty$ under
+$\gamma^A$ and $81\%$ under $\gamma^S$, and by $R=3$ both policies sit
+within a few percent of the ceiling.  The entire design question therefore
+lives at $R\le3$; past that the extra bits buy nothing.
+
+The silent policy dominates the always-transmit one at every $R$, as $C_S>C_A$
+predicts, but the whole of that advantage is concentrated at low rate.  It
+is largest at $R=1$ and by $R=4$ the two curves are indistinguishable.  The
+optimized geometry explains why.  Table~\ref{tab:opt-params} lists
+$(\Delta^\star,\delta^\star)$ against $R$: the cell width $\Delta^\star$
+decays geometrically, settling toward a factor of about $0.55$ per added
+bit, while the ratio $\delta^\star/\Delta^\star$ stays close to $0.4$
+throughout.  The silence cell holds an essentially fixed fraction of a cell,
+so it shrinks with the cell; by \eqref{eq:silence-prob} the silence
+probability vanishes with it, and $\gamma^S$ degenerates continuously into
+$\gamma^A$.  The two effects visible at the knee of
+Figure~\ref{fig:jee-vs-R} -- silence ceasing to help, and quantization
+ceasing to cost -- are the same phenomenon, $\Delta^\star\to0$, seen from
+two sides.
+
+\begin{table}[t]
+\centering
+\caption{Optimal ladder parameters of $\gamma^S$ against $R$, in units of
+$\sigma$, at $\mathrm{SNR}=0$~dB.  Obtained by maximizing
+$C(R,\Delta,\delta)$ directly, so no simulation is involved and the range
+extends past the swept $R\le5$.  At $R=1$ the single pair of thresholds is
+$\mu/2\mp\delta$ and $\Delta$ is inert.}
+\label{tab:opt-params}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{l|cccccc}
+\hline
+$R$ & 2 & 3 & 4 & 5 & 6 & 7\\
+\hline
+$\Delta^\star$ & 0.867 & 0.529 & 0.310 & 0.176 & 0.099 & 0.054\\
+$\delta^\star$ & 0.384 & 0.224 & 0.127 & 0.070 & 0.038 & 0.021\\
+$\delta^\star/\Delta^\star$ & 0.443 & 0.424 & 0.409 & 0.396 & 0.387 & 0.379\\
+$\Delta^\star(R)/\Delta^\star(R{-}1)$ & -- & 0.610 & 0.585 & 0.570 & 0.559 & 0.551\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=\linewidth]{Figs/fig_icassp_JEE_vs_R_N3000_snrm5.png}
+ \caption{As Figure~\ref{fig:jee-vs-R}, at $\mathrm{SNR}=-5$~dB, where
+ $C_\infty\approx0.0395$.}
+ \label{fig:jee-m5}
+\end{figure}
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=\linewidth]{Figs/fig_icassp_JEE_vs_R_N3000_snrp5.png}
+ \caption{As Figure~\ref{fig:jee-vs-R}, at $\mathrm{SNR}=+5$~dB, where
+ $C_\infty\approx0.3953$.}
+ \label{fig:jee-p5}
+\end{figure}
+
+Across the three operating points only the vertical scale changes.  The
+ceiling moves from $C_\infty\approx0.0395$ at $-5$~dB to $0.125$ at
+$0$~dB to $0.3953$ at $+5$~dB, an order of magnitude, while the shape of
+both curves is preserved: normalized by $C_\infty$ the bound curves agree
+to within $0.7$ percentage points, and $(\Delta^\star,\delta^\star)$ in
+units of $\sigma$ barely move.  This is \eqref{eq:ceiling} showing through
+-- the model enters only through $s$, which $C_\infty$ absorbs.  SNR sets
+the achievable exponent; $R$ sets what fraction of it is achieved.
+
+Both policies are charged the nominal $R$, which by \eqref{eq:mean-rate}
+overstates what $\gamma^S$ sends: at $R=1$ and $0$~dB it transmits
+$\bar R\approx0.59$ bits per sensor, below the one bit $\gamma^A$ must
+spend.
+
 \section{Conclusion}
-The proposed structure combines the optimal-policy results for large
-sensor populations with a rate-aware encoder. Notably, the silent
-policy attains a strictly larger error exponent than the
-always-transmit policy while sending less data, showing that selective
-silence can simultaneously reduce communication and improve detection
-performance.
+We combined the optimal-policy results for large sensor populations with a
+rate-aware encoder, generalizing the one-bit always-transmit and silent
+policies into a single $R$-bit threshold family whose error exponent is
+available in closed form.  Measured against the unquantized ceiling
+$C_\infty=s^2/8$, the family saturates quickly: one bit per sensor already
+buys $63\%$ of $C_\infty$ without silence and $81\%$ with it, three bits
+come within a few percent, and beyond that the extra rate is wasted.
+Selective silence is therefore worth the most at exactly the rate where rate
+is scarcest -- at $R=1$ it raises the exponent while transmitting
+$\bar R\approx0.59$ bits per sensor, where the always-transmit policy must
+spend a full bit -- and its advantage vanishes as the optimal cell width
+shrinks and the silence cell closes with it.
 
 \begin{thebibliography}{9}
 \bibitem{Sanjari2025}
