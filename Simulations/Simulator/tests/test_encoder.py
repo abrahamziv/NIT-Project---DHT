@@ -88,6 +88,19 @@ def test_silence_encoder_wider_silence_uses_less_rate():
     assert wide.mean_rate(model) < narrow.mean_rate(model)
 
 
+def test_silence_encoder_nonpow2_active_count_rounds_up_bits():
+    # 3 active bins need ceil(log2(3)) = 2 bits for a real fixed-length code,
+    # not the fractional log2(3) = 1.585 a real code can't spend.
+    model = GaussianShift.from_snr_db(0.0)
+    enc = SilenceEncoder([0.5, 1.0, 2.0], [1])
+    assert enc.M - len(enc.silent_indices) == 3
+    q1 = enc.cell_probs(model, 1)
+    q2 = enc.cell_probs(model, 2)
+    p_silent = model.p * q1[1] + (1 - model.p) * q2[1]
+    expected = 2.0 * (1.0 - p_silent)
+    np.testing.assert_allclose(enc.mean_rate(model), expected, rtol=1e-12)
+
+
 def test_silence_encoder_M4_mean_rate_matches_direct_computation():
     model = GaussianShift.from_snr_db(0.0)
     enc = SilenceEncoder([0.2, 1, 5], [1, 2])

@@ -26,6 +26,14 @@ def test_sweep_records_fusion_backend():
     assert res["fusion"] == {"method": "tilted", "G": 2**16, "nsig": 14.0}
 
 
+def test_sweep_over_snr_empty_raises():
+    try:
+        sweep_over_snr([], GaussianShift.from_snr_db, lambda model, n: None, N=6)
+    except ValueError:
+        return
+    raise AssertionError("expected ValueError for empty snr_dbs")
+
+
 def test_sweep_over_snr_monotone():
     snrs = [-5.0, 0.0, 5.0]
     res = sweep_over_snr(

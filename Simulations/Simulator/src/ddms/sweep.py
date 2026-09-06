@@ -37,6 +37,9 @@ def sweep_over_N(model, make_bank, Ns, fc=None):
 
 def sweep_over_snr(snr_dbs, make_model, make_bank, N, fc=None):
     """make_model(snr_db) -> model, make_bank(model, N) -> EncoderBank."""
+    snr_dbs = list(snr_dbs)
+    if not snr_dbs:
+        raise ValueError("snr_dbs must be non-empty")
     rows = []
     for snr_db in snr_dbs:
         model = make_model(snr_db)

@@ -101,7 +101,7 @@ class SilenceEncoder(ThresholdEncoder):
         super().__init__(thresholds)
         self.silent_indices = tuple(sorted(silent_indices))
         n_active = self.M - len(self.silent_indices)
-        self._active_bits = float(np.log2(n_active))
+        self._active_bits = float(np.ceil(np.log2(n_active)))
 
     def mean_rate(self, model):
         """Expected bits/sensor actually transmitted."""

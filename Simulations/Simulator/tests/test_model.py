@@ -18,6 +18,16 @@ def test_lr_cdf_matches_empirical_cdf():
         assert res.pvalue > 0.01
 
 
+def test_lr_cdf_matches_empirical_cdf_negative_mu():
+    # l(y) is decreasing in y when mu < 0; lr_cdf must flip its tail
+    # accordingly instead of silently mirroring the true CDF.
+    model = GaussianShift(-1.2)
+    for j in (1, 2):
+        _, l = model.sample(j, 20_000, np.random.default_rng(j + 10))
+        res = kstest(l, lambda t: model.lr_cdf(t, j))
+        assert res.pvalue > 0.01
+
+
 def test_sample_consistent_with_likelihood_ratio():
     model = GaussianShift(0.7, sigma=1.3)
     y, l = model.sample(2, 1000, np.random.default_rng(2))

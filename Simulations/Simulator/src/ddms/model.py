@@ -76,7 +76,9 @@ class GaussianShift(StatisticalModel):
             return (t >= 1.0).astype(float)
         with np.errstate(divide="ignore", invalid="ignore"):
             y_t = self.sigma**2 * np.log(t) / self.mu + self.mu / 2
-        f = ndtr((y_t - self._mean(j)) / self.sigma)
+        # l(y) increases with y iff mu > 0; for mu < 0 it's decreasing, so
+        # {l <= t} = {y >= y_t} there instead of {y <= y_t}.
+        f = ndtr(np.sign(self.mu) * (y_t - self._mean(j)) / self.sigma)
         return np.where(t <= 0, 0.0, f)
 
     def chernoff_information(self):
